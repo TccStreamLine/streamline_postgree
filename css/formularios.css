@@ -1,0 +1,100 @@
+/* Estilo para o formulário de cadastro de categoria inspirado no protótipo do Figma */
+.form-container {
+  background: #f5f5ff;
+  border-radius: 24px;
+  box-shadow: 0 4px 24px rgba(76,29,149,0.08);
+  padding: 48px 32px;
+  max-width: 500px;
+  margin: 48px auto;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.form-container h3 {
+  color: #4C1D95;
+  font-size: 2rem;
+  font-weight: 700;
+  margin-bottom: 32px;
+  text-align: center;
+  letter-spacing: 1px;
+}
+
+.form-group {
+  width: 100%;
+  margin-bottom: 32px;
+  position: relative;
+}
+
+.form-group input[type="text"] {
+  width: 100%;
+  padding: 18px 16px 18px 48px;
+  border-radius: 12px;
+  border: none;
+  background: #ede9fe;
+  font-size: 1.1rem;
+  color: #4C1D95;
+  box-shadow: 0 2px 8px rgba(76,29,149,0.05);
+  outline: none;
+  transition: background 0.2s;
+}
+
+.form-group input[type="text"]:focus {
+  background: #fff;
+}
+
+.form-group label {
+  position: absolute;
+  left: 16px;
+  top: 50%;
+  transform: translateY(-50%);
+  color: #6D28D9;
+  font-size: 1rem;
+  pointer-events: none;
+  transition: 0.2s;
+}
+
+.form-group input:not(:placeholder-shown) + label,
+.form-group input:focus + label {
+  top: 8px;
+  left: 12px;
+  font-size: 0.85rem;
+  color: #4C1D95;
+}
+
+.form-actions {
+  width: 100%;
+  display: flex;
+  justify-content: center;
+}
+
+.btn-primary {
+  background: linear-gradient(90deg, #6D28D9 0%, #4C1D95 100%);
+  color: #fff;
+  font-weight: 700;
+  font-size: 1.1rem;
+  border: none;
+  border-radius: 12px;
+  padding: 18px 0;
+  width: 100%;
+  max-width: 320px;
+  box-shadow: 0 4px 16px rgba(76,29,149,0.12);
+  cursor: pointer;
+  transition: transform 0.2s, box-shadow 0.2s;
+}
+
+.btn-primary:hover {
+  transform: scale(1.04);
+  box-shadow: 0 8px 24px rgba(76,29,149,0.18);
+}
+
+/* Responsivo */
+@media (max-width: 700px) {
+  .form-container {
+    padding: 32px 12px;
+    max-width: 95vw;
+  }
+  .form-container h3 {
+    font-size: 1.3rem;
+  }
+}

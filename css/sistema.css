@@ -1,0 +1,627 @@
+:root {
+    --primary-bg: #F8F7FF;
+    --sidebar-bg: #FFFFFF;
+    --accent-color: #6D28D9;
+    /* Um tom de roxo forte */
+    --accent-color-dark: #4C1D95;
+    --text-color: #1F2937;
+    --text-light: #6B7280;
+    --border-color: #E5E7EB;
+    --card-shadow: 0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1);
+}
+
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+/* CORREÇÃO PRIORITÁRIA - REMOVE QUALQUER ANIMAÇÃO DO MENU AGENDA */
+a[href="agenda.php"] {
+    transition: none !important;
+    animation: none !important;
+    transform: none !important;
+    will-change: auto !important;
+}
+
+body {
+    font-family: 'Inter', sans-serif;
+    background-color: var(--primary-bg);
+    color: var(--text-color);
+    display: flex;
+    height: 100vh;
+    overflow: hidden;
+}
+
+/* --- Sidebar --- */
+.sidebar {
+    width: 260px;
+    background-color: var(--sidebar-bg);
+    border-right: 1px solid var(--border-color);
+    display: flex;
+    flex-direction: column;
+    padding: 1.5rem;
+    flex-shrink: 0;
+    position: relative;
+    overflow: visible;
+}
+
+.sidebar-logo {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-bottom: 2.5rem;
+}
+
+.sidebar-logo img {
+    width: 50px;
+    /* Ajuste o tamanho da sua logo */
+}
+
+.menu-section {
+    margin-bottom: 1.5rem;
+}
+
+.menu-section h6 {
+    font-size: 0.75rem;
+    font-weight: 600;
+    color: var(--text-light);
+    text-transform: uppercase;
+    padding: 0 0.75rem;
+    margin-bottom: 0.5rem;
+}
+
+.menu-list {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+}
+
+.menu-list li {
+    margin: 0;
+    padding: 0;
+    position: relative;
+}
+
+.menu-list a {
+    display: block;
+    padding: 0.75rem;
+    border-radius: 8px;
+    text-decoration: none;
+    color: var(--text-color);
+    font-weight: 500;
+    font-size: 0.95rem;
+    position: relative;
+    box-sizing: border-box;
+    /* Remove todas as animações e transições */
+    transition: none;
+    animation: none;
+    transform: none;
+    will-change: auto;
+}
+
+.menu-list a i {
+    display: inline-block;
+    width: 20px;
+    margin-right: 1rem;
+    color: var(--text-light);
+    /* Remove todas as animações */
+    transition: none;
+    animation: none;
+    transform: none;
+}
+
+.menu-list a:hover {
+    background-color: #F3F4F6 !important;
+}
+
+.menu-list a.active {
+    background-color: #F3F4F6 !important;
+    color: var(--accent-color) !important;
+    font-weight: 600;
+    border-left: 4px solid var(--accent-color);
+    /* Sem transições ou animações */
+    transition: none;
+    animation: none;
+}
+
+.menu-list a.active i {
+    color: var(--accent-color) !important;
+    /* Sem transições ou animações */
+    transition: none;
+    animation: none;
+}
+
+.sidebar .outros {
+    margin-top: auto;
+}
+
+/* --- Main Content --- */
+.main-content {
+    flex-grow: 1;
+    padding: 2rem 3rem;
+    overflow-y: auto;
+}
+
+.main-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 2rem;
+}
+
+.main-header h2 {
+    font-size: 1.75rem;
+    font-weight: 700;
+}
+
+.user-profile {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    cursor: pointer;
+    padding: 0.5rem;
+    border-radius: 8px;
+    position: relative;
+}
+
+.user-profile span {
+    font-weight: 500;
+}
+
+.user-profile .avatar {
+    width: 40px;
+    height: 40px;
+    background-color: var(--accent-color);
+    border-radius: 50%;
+    color: white;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.2rem;
+}
+
+/* --- Welcome Section --- */
+.welcome-section {
+    margin-bottom: 2.5rem;
+}
+
+.welcome-section h1 {
+    font-size: 2rem;
+    font-weight: 700;
+    margin-bottom: 0.5rem;
+}
+
+.welcome-section p {
+    font-size: 1.1rem;
+    color: var(--text-light);
+}
+
+
+.action-cards {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 1.5rem;
+    margin-bottom: 3rem;
+}
+
+.action-card {
+    background-color: var(--sidebar-bg);
+    padding: 1.5rem;
+    border-radius: 12px;
+    box-shadow: var(--card-shadow);
+    text-align: center;
+    text-decoration: none;
+    color: var(--text-color);
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.action-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 10px 15px -3px rgb(0 0 0 / 0.1), 0 4px 6px -4px rgb(0 0 0 / 0.1);
+}
+
+.action-card i {
+    font-size: 2rem;
+    padding: 1rem;
+    background-color: #F3E8FF;
+    /* Roxo bem claro */
+    color: var(--accent-color);
+    border-radius: 10px;
+    margin-bottom: 1rem;
+    display: inline-block;
+}
+
+.action-card h3 {
+    font-size: 1.1rem;
+    font-weight: 600;
+}
+
+/* --- Pricing Plans --- */
+.pricing-plans {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 1.5rem;
+}
+
+.plan-card {
+    background-color: #F9FAFB;
+    border: 1px solid var(--border-color);
+    border-radius: 12px;
+    padding: 2rem;
+    display: flex;
+    flex-direction: column;
+    position: relative;
+    transition: transform 0.2s ease, box-shadow 0.2s ease; 
+}
+
+.plan-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 10px 15px -3px rgb(0 0 0 / 0.1), 0 4px 6px -4px rgb(0 0 0 / 0.1);
+}
+
+.plan-card.pro {
+    background-color: var(--accent-color-dark);
+    color: white;
+    border: none;
+}
+
+.recommended-badge {
+    position: absolute;
+    top: -12px;
+    left: 50%;
+    transform: translateX(-50%);
+    background-color: #F59E0B;
+    /* Laranja/Amarelo */
+    color: var(--text-color);
+    padding: 0.25rem 0.75rem;
+    border-radius: 12px;
+    font-size: 0.75rem;
+    font-weight: 600;
+}
+
+.plan-card h4 {
+    font-size: 1.5rem;
+    font-weight: 700;
+    margin-bottom: 0.5rem;
+}
+
+.plan-card p {
+    font-size: 0.9rem;
+    color: var(--text-light);
+    margin-bottom: 2rem;
+    flex-grow: 1;
+}
+
+.plan-card.pro p {
+    color: #D1D5DB;
+}
+
+.price {
+    font-size: 2.5rem;
+    font-weight: 700;
+    margin-bottom: 0.25rem;
+}
+
+.price-free {
+    font-size: 3rem;
+    font-weight: 700;
+    margin-bottom: 2rem;
+}
+
+.price span {
+    font-size: 1rem;
+    font-weight: 500;
+    color: var(--text-light);
+}
+
+.plan-card.pro .price span {
+    color: #D1D5DB;
+}
+
+.plan-button {
+    width: 100%;
+    padding: 0.85rem;
+    border-radius: 8px;
+    border: 1px solid var(--accent-color);
+    background-color: transparent;
+    color: var(--accent-color);
+    font-weight: 600;
+    font-size: 1rem;
+    cursor: pointer;
+    transition: background-color 0.2s ease, color 0.2s ease;
+    margin-top: 1rem;
+    text-decoration: none;
+}
+
+.plan-card form {
+    margin-top: auto;
+    /* Empurra o botão para o final do card */
+}
+
+.plan-button.primary {
+    background-color: var(--accent-color);
+    color: white;
+}
+
+.plan-button.primary:hover {
+    background-color: var(--accent-color-dark);
+    border-color: var(--accent-color-dark);
+}
+
+.plan-card.pro .plan-button {
+    background-color: white;
+    color: var(--accent-color);
+    border: none;
+}
+
+.plan-card.pro .plan-button:hover {
+    background-color: #F3F4F6;
+}
+
+/* --- ESTILOS DO SINO DE NOTIFICAÇÃO --- */
+
+.user-profile {
+    display: flex;
+    align-items: center;
+    gap: 20px;
+}
+
+.notification-icon {
+    position: relative;
+    font-size: 1.2em;
+    color: #555;
+    cursor: pointer;
+}
+
+/* ESTILO DA BOLINHA VERMELHA (BADGE) */
+.notification-icon .badge {
+    position: absolute;
+    top: -5px;
+    right: -8px;
+    background-color: #DC143C;
+    /* Vermelho */
+    color: white;
+    font-size: 10px;
+    font-weight: bold;
+    border-radius: 50%;
+    width: 18px;
+    height: 18px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border: 2px solid #fff;
+}
+
+/* PAINEL DE NOTIFICAÇÕES */
+.notificacao-painel {
+    position: absolute;
+    top: 150%;
+    right: 0;
+    width: 350px;
+    background-color: #fff;
+    border-radius: 8px;
+    border: 1px solid #E1E1E1;
+    box-shadow: 0 5px 20px rgba(0, 0, 0, 0.15);
+    z-index: 1002;
+    overflow: hidden;
+}
+
+.painel-header {
+    padding: 15px;
+    background-color: #f9f9ff;
+    border-bottom: 1px solid #E1E1E1;
+    text-align: center;
+}
+
+.painel-header a {
+    color: #333;
+    text-decoration: none;
+    font-size: 14px;
+    line-height: 1.4;
+}
+
+.painel-header a strong {
+    color: #6264A7;
+}
+
+.painel-corpo {
+    max-height: 400px;
+    overflow-y: auto;
+    padding: 8px;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+
+.painel-corpo .evento-item {
+    display: flex;
+    align-items: stretch;
+    border-radius: 4px;
+    padding: 10px;
+    font-size: 14px;
+    border: 1px solid #f0f0f0;
+    border-left: 5px solid #6264A7;
+}
+
+.painel-corpo .evento-horario {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    min-width: 70px;
+    padding: 5px 10px;
+    margin-right: 10px;
+    padding-right: 10px;
+    border-right: 1px solid #f0f0f0;
+}
+
+.painel-corpo .evento-detalhes h4 {
+    font-size: 1em;
+    margin: 0 0 5px 0;
+}
+
+.painel-corpo .evento-detalhes p {
+    font-size: 0.85em;
+    margin: 0;
+    color: #666;
+}
+
+.role-funcionario .action-cards {
+    margin-top: 3rem;
+}
+
+.role-funcionario .action-card {
+    padding: 2.5rem 1.5rem;
+}
+
+.role-funcionario .action-card h3 {
+    font-size: 1.3rem;
+}
+
+.dashboard-funcionario-grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 2rem;
+    margin-top: 3rem;
+}
+
+.estoque-baixo-summary h3 {
+    font-size: 1.2rem;
+    font-weight: 600;
+    margin-bottom: 1.5rem;
+    color: var(--text-color);
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.estoque-baixo-summary h3 .fa-exclamation-triangle {
+    color: #F59E0B;
+}
+
+.estoque-baixo-summary .list-card {
+    background-color: #fff;
+    border-radius: 12px;
+    padding: 1rem 1.5rem;
+    box-shadow: var(--card-shadow);
+}
+
+.estoque-baixo-summary ul {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+}
+
+.estoque-baixo-summary li {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 1rem 0;
+    border-bottom: 1px solid var(--border-color);
+}
+
+.estoque-baixo-summary li:last-child {
+    border-bottom: none;
+}
+
+.estoque-baixo-summary .produto-titulo {
+    font-weight: 500;
+}
+
+.estoque-baixo-summary .produto-qtd strong {
+    color: #EF4444;
+    /* Vermelho para destaque */
+    font-weight: 700;
+}
+
+@media (max-width: 768px) {
+    .dashboard-funcionario-grid {
+        grid-template-columns: 1fr;
+    }
+}
+
+/* --- ESTILOS DE CARD PADRÃO (DO DASHBOARD) --- */
+.list-card {
+    background-color: #fff;
+    border-radius: 12px;
+    padding: 1.5rem;
+    box-shadow: var(--card-shadow);
+    display: flex;
+    flex-direction: column;
+}
+
+.list-card h3 {
+    margin-top: 0;
+    margin-bottom: 1.5rem;
+    font-size: 1.1rem;
+    font-weight: 600;
+}
+
+.list-card ul {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+    flex-grow: 1;
+}
+
+.list-card li {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 0.75rem 0;
+    border-bottom: 1px solid var(--border-color);
+}
+
+.list-card li:last-child {
+    border-bottom: none;
+}
+
+/* CORREÇÃO RADICAL PARA MENU DA AGENDA - FORÇA ESTABILIDADE TOTAL */
+.sidebar * {
+    box-sizing: border-box !important;
+    backface-visibility: hidden !important;
+    -webkit-backface-visibility: hidden !important;
+}
+
+.menu-list a[href="agenda.php"],
+.menu-list a[href="agenda.php"]:hover,
+.menu-list a[href="agenda.php"].active {
+    display: block !important;
+    position: static !important;
+    transform: none !important;
+    transition: none !important;
+    animation: none !important;
+    will-change: auto !important;
+    backface-visibility: visible !important;
+    -webkit-backface-visibility: visible !important;
+    perspective: none !important;
+    -webkit-perspective: none !important;
+    -webkit-font-smoothing: subpixel-antialiased !important;
+    -moz-osx-font-smoothing: auto !important;
+    contain: none !important;
+    isolation: auto !important;
+}
+
+.menu-list a[href="agenda.php"]:hover {
+    background-color: #F3F4F6 !important;
+}
+
+.menu-list a[href="agenda.php"].active {
+    background-color: #F3F4F6 !important;
+    color: var(--accent-color) !important;
+    border-left: 4px solid var(--accent-color) !important;
+}
+
+.menu-list a[href="agenda.php"] i {
+    transform: none !important;
+    transition: none !important;
+    animation: none !important;
+    will-change: auto !important;
+}
+
+.plan-card a.plan-button {
+    text-decoration: none !important;
+}
+

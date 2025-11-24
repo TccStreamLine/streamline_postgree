@@ -1,0 +1,121 @@
+.main-content .actions-container {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 2rem;
+}
+
+.main-content .search-bar {
+    position: relative;
+    width: 300px;
+}
+.main-content .search-bar input {
+    width: 100%;
+    padding: 0.75rem 0.75rem 0.75rem 2.5rem;
+    border: 1px solid var(--border-color);
+    border-radius: 8px;
+    font-size: 0.95rem;
+}
+.main-content .search-bar i {
+    position: absolute;
+    left: 1rem;
+    top: 50%;
+    transform: translateY(-50%);
+    color: var(--text-light);
+}
+.main-content .btn-primary {
+    background-color: var(--accent-color);
+    color: white;
+    padding: 0.75rem 1.5rem;
+    border-radius: 8px;
+    text-decoration: none;
+    font-weight: 600;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    transition: background-color 0.2s ease;
+}
+.main-content .btn-primary:hover {
+    background-color: var(--accent-color-dark);
+}
+.main-content .table-container {
+    background-color: var(--sidebar-bg);
+    border-radius: 12px;
+    padding: 2rem;
+    box-shadow: var(--card-shadow);
+}
+.main-content table {
+    width: 100%;
+    border-collapse: collapse;
+}
+.main-content th, .main-content td {
+    padding: 1rem;
+    text-align: left;
+    border-bottom: 1px solid var(--border-color);
+}
+.main-content th {
+    font-size: 0.85rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    color: var(--text-light);
+}
+.main-content td.text-center {
+    text-align: center;
+}
+
+/* ESTILOS PARA MENSAGENS DE FEEDBACK */
+.main-content .message-container {
+    margin-bottom: 1.5rem;
+}
+.main-content .alert {
+    padding: 1rem;
+    border-radius: 8px;
+    color: white;
+    font-weight: 500;
+}
+.main-content .alert-success {
+    background-color: #10B981; /* Verde */
+}
+.main-content .alert-danger {
+    background-color: #EF4444; /* Vermelho */
+}
+
+/* Coluna de Ações na Tabela */
+.main-content td.actions {
+    display: flex;
+    gap: 0.5rem;
+}
+.main-content .btn-action {
+    color: var(--text-light);
+    padding: 0.5rem;
+    border-radius: 4px;
+}
+.main-content .btn-action:hover {
+    background-color: #F3F4F6;
+}
+.main-content .btn-edit:hover { color: #3B82F6; /* Azul */ }
+.main-content .btn-delete:hover { color: #EF4444; /* Vermelho */ }
+
+.actions-buttons {
+    display: flex;
+    gap: 1rem; /* Espaçamento entre os botões */
+}
+
+/* Estilo para o botão secundário (ex: Cadastrar Categoria) */
+.btn-secondary {
+    background-color: #F3F4F6; /* Cinza claro */
+    color: var(--text-color);
+    padding: 0.75rem 1.5rem;
+    border-radius: 8px;
+    text-decoration: none;
+    font-weight: 600;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    border: 1px solid var(--border-color);
+    transition: background-color 0.2s ease;
+}
+
+.btn-secondary:hover {
+    background-color: #E5E7EB; /* Cinza um pouco mais escuro */
+}

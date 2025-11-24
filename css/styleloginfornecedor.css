@@ -1,0 +1,424 @@
+/* sigmaboyhujyiyuy76hy Importar Poppins do Google Fonts */
+@import url('https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap');
+@import url('https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css');
+
+
+/* Fonte global */
+body {
+    font-family: 'Poppins', 'Segoe UI', sans-serif;
+    margin: 0;
+    padding: 0;
+}
+
+/* Layout de duas colunas */
+.main-container {
+    display: flex;
+    height: 100vh;
+    width: 100%;
+}
+
+.left-panel {
+    width: 50%;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    padding: 0 5%;
+    position: relative;
+    background: #fff;
+    text-align: center;
+}
+
+.right-panel {
+    width: 50%;
+    position: relative;
+    overflow: hidden;
+}
+
+/* Navegação */
+.nav-links {
+    position: absolute;
+    top: 30px;
+    right: 5%;
+    /* MODIFICADO: Alinhamento mais flexível */
+    display: flex;
+    gap: 30px;
+    z-index: 100;
+}
+
+.nav-link {
+    color: #4a0f81;
+    text-decoration: none;
+    font-size: 1.2rem;
+    font-weight: 600;
+    padding: 5px 10px;
+    border-bottom: 2px solid transparent;
+    transition: all 0.3s ease;
+}
+
+.nav-link:hover,
+.nav-link.active {
+    border-bottom-color: #4a0f81;
+}
+
+/* Cabeçalho e Títulos */
+.header-logo {
+    position: absolute;
+    top: 30px;
+    left: 30px;
+}
+
+.main-login-title {
+    font-size: 3rem;
+    color: #4a0f81;
+    font-weight: 700;
+    margin-bottom: 5px;
+    display: block;
+    white-space: nowrap;
+    text-align: center;
+}
+
+.main-login-title::after {
+    content: none;
+}
+
+.login-slogan {
+    color: #888;
+    font-size: 1.1rem;
+    margin-bottom: 40px;
+    margin-left: 30px;
+}
+
+/* Grupos de formulário */
+.form-row-group {
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+}
+
+.form-row {
+    display: flex;
+    gap: 20px;
+    flex-wrap: wrap;
+}
+
+.form-group {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+}
+
+.inputBox {
+    position: relative;
+}
+
+/* Formulário e Campos de Entrada */
+.login-content {
+    text-align: left;
+    width: 80%;
+    max-width: 380px;
+}
+
+.loginForm {
+    width: 100%;
+}
+
+.inputLogin {
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+}
+
+.input-group {
+    position: relative;
+}
+
+.input-group .icon {
+    position: absolute;
+    left: 15px;
+    margin-left: 30px;
+    top: 50%;
+    transform: translateY(-50%);
+    color: #8e24aa;
+}
+
+/* Campos com efeito igual ao cadastro */
+.inputLogin input,
+.inputLogin select {
+    margin-left: 30px;
+    width: 100%;
+    padding: 15px 15px 15px 50px;
+    background: #f3e8ff;
+    border: none;
+    border-radius: 10px;
+    font-size: 1rem;
+    color: #4a0f81;
+    font-family: 'Poppins', 'Segoe UI', sans-serif;
+    transition: all 0.3s ease;
+    outline: none;
+    box-sizing: border-box;
+}
+
+.inputLogin select {
+    -webkit-appearance: none;
+    -moz-appearance: none;
+    appearance: none;
+    cursor: pointer;
+    background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'%3e%3cpath fill='none' stroke='%238e24aa' stroke-linecap='round' stroke-linejoin='round' stroke-width='2' d='M2 5l6 6 6-6'/%3e%3c/svg%3e");
+    background-repeat: no-repeat;
+    background-position: right 1rem center;
+    background-size: 1em;
+}
+
+.inputLogin select:required:invalid {
+    color: #8e24aa;
+}
+
+.inputLogin input:focus {
+    background: #fff;
+    box-shadow: 0 0 8px rgba(142, 12, 202, 0.5);
+    border: 2px solid #8e24aa;
+}
+
+.inputLogin input::placeholder {
+    color: #8e24aa;
+    transition: color 0.3s ease;
+}
+
+.inputLogin input:focus::placeholder {
+    color: #b85cff;
+}
+
+/* Botão de login alinhado com os campos */
+.inputSubmit {
+    background: linear-gradient(to right, #6a1b9a, #4a148c);
+    color: #fff;
+    font-weight: 600;
+    display: flex;
+    justify-content: center;
+    /* MODIFICADO: Centraliza o texto do botão */
+    font-size: 1.1rem;
+    cursor: pointer;
+    border: none;
+    padding: 16px;
+    border-radius: 12px;
+    margin-left: 30px;
+    width: 100%;
+    margin-top: 15px;
+    margin-bottom: 15px;
+    transition: all 0.3s ease;
+    box-shadow: 0 4px 10px rgba(74, 20, 140, 0.3);
+}
+
+.inputSubmit:hover {
+    transform: scale(1.05);
+    box-shadow: 0 6px 15px rgba(74, 20, 140, 0.5);
+    background: linear-gradient(to right, #7b1fa2, #5e35b1);
+}
+
+.login-links-container {
+    display: flex;
+    justify-content: space-between;
+    margin-top: 10px;
+    align-items: center;
+
+}
+
+img {
+    width: 900px;
+}
+
+.logo {
+    width: 300px;
+    margin-top: -35px;
+}
+
+.success-message {
+    color: #10B981;
+    font-weight: bold;
+    text-align: center;
+    margin-bottom: 20px;
+}
+
+/* --- Media Queries para Responsividade --- */
+
+/* Telas até 1200px (notebooks grandes) */
+@media (max-width: 1200px) {
+    .nav-links {
+        right: 3%;
+        gap: 25px;
+    }
+
+    .login-content {
+        max-width: 360px;
+    }
+
+    img {
+        width: 750px;
+    }
+}
+
+/* Telas até 1024px (notebooks médios) */
+@media (max-width: 1024px) {
+    .nav-links {
+        right: 2%;
+        gap: 20px;
+        font-size: 1.1rem;
+    }
+
+    .login-content {
+        max-width: 340px;
+    }
+
+    .main-login-title {
+        font-size: 2.8rem;
+    }
+
+    img {
+        width: 650px;
+    }
+}
+
+/* ADICIONADO: Ponto de quebra para tablets maiores */
+@media (max-width: 992px) {
+    .main-container {
+        flex-direction: column;
+        height: auto;
+    }
+
+    .left-panel,
+    .right-panel {
+        width: 100%;
+        height: auto;
+    }
+
+    .left-panel {
+        padding: 40px 20px;
+        order: 2;
+        /* Formulário aparece depois da navegação */
+    }
+
+    .right-panel {
+        display: none;
+        /* Esconde a imagem */
+    }
+
+    .nav-links {
+        order: 1;
+        /* Navegação aparece primeiro */
+        position: relative;
+        top: auto;
+        right: auto;
+        width: 100%;
+        justify-content: center;
+        padding: 15px 0;
+        background-color: #fff;
+    }
+
+    .header-logo {
+        display: none;
+        /* Esconde o logo que estava posicionado absolutamente */
+    }
+
+    .login-content {
+        width: 100%;
+        max-width: 500px;
+        /* Aumenta um pouco a largura máxima */
+        text-align: center;
+    }
+
+    /* Ajusta margens para mobile */
+    .login-slogan {
+        margin-left: 0;
+        text-align: center;
+    }
+
+    .input-group .icon {
+        margin-left: 0;
+    }
+
+    .inputLogin input,
+    .inputLogin select {
+        margin-left: 0;
+    }
+
+    .inputSubmit {
+        margin-left: 0;
+    }
+}
+
+/* Telas até 768px (tablets / celulares) */
+@media (max-width: 768px) {
+    .main-login-title {
+        font-size: 2.5rem;
+        white-space: nowrap;
+    }
+
+    .login-slogan {
+        font-size: 1rem;
+        margin-left: 0;
+    }
+
+    .inputSubmit {
+        width: 100%;
+        margin-top: 25px;
+        margin-left: 0;
+    }
+
+    /* Alinha o contêiner de links do formulário no mobile */
+    .login-links-container {
+        flex-direction: column;
+        align-items: center;
+        gap: 10px;
+    }
+
+    .input-group .icon {
+        margin-left: 0;
+    }
+
+    .inputLogin input,
+    .inputLogin select {
+        margin-left: 0;
+    }
+}
+
+/* Telas até 576px (celulares pequenos) */
+@media (max-width: 576px) {
+    .header-logo .logo {
+        width: 220px;
+    }
+
+    .main-login-title {
+        font-size: 1.8rem;
+        white-space: nowrap;
+    }
+
+    .login-slogan {
+        font-size: 0.9rem;
+        margin-left: 0;
+    }
+
+    .login-content {
+        width: 90%;
+    }
+
+    .nav-links {
+        gap: 15px;
+        flex-wrap: wrap;
+    }
+
+    .input-group .icon {
+        margin-left: 0;
+    }
+
+    .inputLogin input,
+    .inputLogin select {
+        margin-left: 0;
+        font-size: 0.95rem;
+    }
+
+    .inputSubmit {
+        margin-left: 0;
+        font-size: 1rem;
+    }
+}

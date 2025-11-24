@@ -1,0 +1,262 @@
+/* CSS para Formulário de Venda - Streamline */
+
+/* Container principal do formulário - mesmo estilo do fornecedor */
+.form-produto-container {
+    background-color: white;
+    padding: 2.5rem;
+    border-radius: 16px;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.08);
+    max-width: 900px;
+    margin: 2.5rem auto;
+    width: 100%;
+}
+
+/* Título do formulário - mesmo estilo do fornecedor */
+.form-produto-title {
+    text-align: center;
+    font-size: 1.6rem;
+    font-weight: 700;
+    color: #374151;
+    /* Cinza escuro */
+    margin-bottom: 2.5rem;
+    letter-spacing: 1px;
+}
+
+/* Grid do formulário */
+.form-produto-grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 1.5rem;
+    margin-bottom: 2rem;
+}
+
+/* Grupos de formulário */
+.form-produto-group {
+    display: flex;
+    flex-direction: column;
+}
+
+.form-produto-group label {
+    font-weight: 600;
+    color: #374151;
+    margin-bottom: 0.5rem;
+    font-size: 0.9rem;
+}
+
+/* Inputs e selects - mesmo estilo do fornecedor */
+.form-produto-group input,
+.form-produto-group select {
+    background-color: #F3F4F6;
+    /* Cinza claro de fundo */
+    border-radius: 10px;
+    padding: 1rem;
+    margin-bottom: 1.5rem;
+    border: 2px solid transparent;
+    transition: all 0.2s ease;
+    font-size: 1rem;
+    font-family: 'Inter', sans-serif;
+    color: #1F2937;
+    outline: none;
+}
+
+.form-produto-group input:focus,
+.form-produto-group select:focus {
+    background-color: white;
+    border-color: #6D28D9;
+    /* Roxo */
+    box-shadow: 0 0 0 3px rgba(109, 40, 217, 0.2);
+}
+
+/* Estilo para inputs readonly */
+.form-produto-group input.readonly {
+    background-color: #F3F4F6 !important;
+    cursor: not-allowed;
+    color: #6B7280;
+}
+
+/* Container de itens de venda */
+#itens-container {
+    margin-bottom: 2rem;
+}
+
+/* Item de venda */
+.item-venda {
+    display: grid;
+    grid-template-columns: 2fr 1fr 1fr auto;
+    gap: 1rem;
+    align-items: end;
+    margin-bottom: 1.5rem;
+    padding: 1.5rem;
+    background-color: #F8F9FA;
+    border-radius: 12px;
+    border: 1px solid #E5E7EB;
+}
+
+.item-venda .form-produto-group {
+    margin-bottom: 0;
+    display: flex;
+    flex-direction: column;
+}
+
+.item-venda .form-produto-group input,
+.item-venda .form-produto-group select {
+    margin-bottom: 0;
+}
+
+/* Botão remover */
+.btn-remover {
+    background-color: #EF4444;
+    color: white;
+    border: none;
+    border-radius: 8px;
+    padding: 0 12px;
+    cursor: pointer;
+    height: 54px;
+    font-weight: 600;
+    transition: all 0.2s ease;
+    align-self: end;
+    min-width: 40px;
+}
+
+.btn-remover:hover {
+    background-color: #DC2626;
+    transform: translateY(-2px);
+}
+
+/* Botão secundário - adicionar item */
+.btn-secondary {
+    background-color: #6D28D9;
+    /* Roxo */
+    color: white;
+    padding: 0.75rem 1.5rem;
+    border-radius: 8px;
+    text-decoration: none;
+    font-weight: 600;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem;
+    border: none;
+    transition: all 0.2s ease;
+    cursor: pointer;
+    font-size: 0.9rem;
+    margin: 0 auto;
+    width: fit-content;
+}
+
+.btn-secondary:hover {
+    background-color: #5B21B6;
+    /* Roxo mais escuro */
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(109, 40, 217, 0.3);
+}
+
+/* Ações do formulário */
+.form-produto-actions {
+    text-align: center;
+    margin-top: 2rem;
+}
+
+/* Botão primário - mesmo estilo do fornecedor */
+.btn-produto-primary {
+    background: #6D28D9;
+    /* Roxo */
+    color: white;
+    font-weight: 600;
+    font-size: 1rem;
+    border: none;
+    border-radius: 10px;
+    padding: 1rem 0;
+    width: 100%;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+.btn-produto-primary:hover {
+    background: #5B21B6;
+    /* Roxo mais escuro */
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(109, 40, 217, 0.3);
+}
+
+/* Mensagem de aviso */
+.form-produto-container p {
+    background-color: #FEF3C7;
+    color: #92400E;
+    padding: 1rem;
+    border-radius: 8px;
+    border-left: 4px solid #F59E0B;
+    font-size: 0.9rem;
+}
+
+/* Responsividade */
+@media (max-width: 768px) {
+    .form-produto-container {
+        padding: 2rem 1.5rem;
+        margin: 1rem auto;
+    }
+
+    .form-produto-grid {
+        grid-template-columns: 1fr;
+        gap: 1rem;
+    }
+
+    .item-venda {
+        grid-template-columns: 1fr;
+        gap: 1rem;
+        padding: 1rem;
+        align-items: stretch;
+    }
+
+    .btn-remover {
+        height: auto;
+        padding: 0.5rem 1rem;
+        justify-self: center;
+        width: auto;
+        max-width: 100px;
+    }
+
+    .form-produto-title {
+        font-size: 1.4rem;
+    }
+}
+
+@media (max-width: 480px) {
+    .form-produto-container {
+        padding: 1.5rem 1rem;
+    }
+
+    .item-venda {
+        padding: 1rem 0.5rem;
+    }
+
+    .btn-produto-primary {
+        font-size: 0.9rem;
+    }
+}
+
+/* Estilos específicos movidos do HTML */
+
+/* Mensagem de aviso para edição */
+.form-produto-container .aviso-edicao {
+    text-align: center;
+    margin-bottom: 2rem;
+    color: #6B7280;
+}
+
+/* Botão remover inicialmente oculto */
+.btn-remover.hidden {
+    display: none;
+}
+
+/* Botão adicionar item com margem */
+#btn-adicionar-item {
+    margin-bottom: 1.5rem;
+}
+
+/* Grid específico para dados da venda (2 colunas) */
+.form-produto-grid.duas-colunas {
+    grid-template-columns: 1fr 1fr;
+}

@@ -1,0 +1,718 @@
+/* --- ESTRUTURA PRINCIPAL --- */
+body {
+    font-family: "Segoe UI", -apple-system, BlinkMacSystemFont, Roboto, Helvetica, Arial, sans-serif;
+
+    color: #333;
+    margin: 0;
+    display: flex;
+    height: 100vh;
+}
+
+.main-content {
+    flex-grow: 1;
+    padding: 24px 32px;
+    overflow-y: auto;
+    background: #f5f6fa;
+    position: relative;
+}
+
+/* --- CONTAINER PRINCIPAL DA AGENDA --- */
+.agenda-container {
+    background: #ffffff;
+    border-radius: 16px;
+    padding: 32px;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.15);
+    margin: 0;
+    min-height: calc(100vh - 48px);
+    box-sizing: border-box;
+}
+
+/* --- CABEÇALHO PRINCIPAL (MODIFICADO) --- */
+.main-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 32px;
+    padding-bottom: 20px;
+    border-bottom: 2px solid #f0f0f0;
+}
+
+.main-header h2 {
+    font-size: 32px;
+    font-weight: 700;
+    margin: 0;
+    color: #2c3e50;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+}
+
+.header-left,
+.header-right {
+    flex: 1;
+}
+
+.header-right {
+    display: flex;
+    justify-content: flex-end;
+}
+
+/* --- BOTÕES --- */
+.btn {
+    border: 2px solid #e0e0e0;
+    background-color: #fff;
+    border-radius: 8px;
+    padding: 10px 16px;
+    cursor: pointer;
+    font-size: 14px;
+    font-weight: 600;
+    transition: all 0.3s ease;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.btn:hover {
+    background-color: #f8f9fa;
+    border-color: #4a148c;
+    transform: translateY(-2px);
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15);
+}
+
+.btn-primary {
+    background: linear-gradient(to right, #6a1b9a, #4a148c);
+    color: white;
+    border: none;
+    padding: 12px 20px;
+    border-radius: 8px;
+    font-weight: 600;
+}
+
+.btn-primary i {
+    margin-right: 8px;
+}
+
+.btn-primary:hover {
+    transform: scale(1.05);
+    box-shadow: 0 6px 15px rgba(74, 20, 140, 0.5);
+    background: linear-gradient(to right, #7b1fa2, #5e35b1);
+}
+
+.btn-icon {
+    padding: 8px 10px;
+    line-height: 1;
+}
+
+/* --- ESTILO DO CARROSSEL DE MÊS --- */
+.navigation-buttons {
+    flex: 0 1 auto;
+    display: flex;
+    align-items: center;
+    gap: 0;
+    background-color: #f0f2f5;
+    border: 1px solid #E1E1E1;
+    border-radius: 25px;
+    padding: 4px;
+    box-shadow: 0 1px 2px rgba(0, 0, 0, 0.04);
+}
+
+#mes-ano {
+    margin: 0 12px;
+    padding: 0;
+    font-size: 16px;
+    font-weight: 600;
+    color: #7732b8;
+    width: 170px;
+    text-align: center;
+}
+
+.navigation-buttons .btn-icon {
+    background-color: #fff;
+    border: none;
+    color: #7732b8;
+    border-radius: 50%;
+    width: 32px;
+    height: 32px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+    transition: background-color 0.2s ease, transform 0.1s ease;
+}
+
+.navigation-buttons .btn-icon:hover {
+    background-color: #f8f8f8;
+}
+
+.navigation-buttons .btn-icon:active {
+    transform: scale(0.95);
+    background-color: #f0f0f0;
+}
+
+
+/* --- CONTAINER DO CALENDÁRIO E EVENTOS --- */
+#calendar-container {
+    background-color: transparent;
+    padding: 0;
+    border-radius: 0;
+    border: none;
+    box-shadow: none;
+}
+
+/* --- GRID DO CALENDÁRIO --- */
+.calendario-grid {
+    display: grid;
+    grid-template-columns: repeat(7, 1fr);
+    gap: 8px;
+    margin-top: 24px;
+}
+
+.dias-semana-grid {
+    display: grid;
+    grid-template-columns: repeat(7, 1fr);
+    gap: 8px;
+    margin-bottom: 16px;
+}
+
+.dia-semana {
+    font-weight: 700;
+    text-align: center;
+    padding: 12px 0;
+    color: #7732b8;
+    font-size: 14px;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+}
+
+.dia-mes {
+    background: #fff;
+    border: 1px solid #e8e8e8;
+    border-radius: 8px;
+    text-align: center;
+    padding: 8px 4px;
+    font-size: 16px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    min-height: 100px;
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    justify-content: flex-start;
+    position: relative;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+}
+
+.dia-mes .numero-dia {
+    margin-bottom: 4px;
+    font-weight: 700;
+    width: 100%;
+    text-align: left;
+}
+
+.dia-mes:hover {
+    background: #f8f9ff;
+    border-color: #7732b8;
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(119, 50, 184, 0.15);
+}
+
+.dia-vazio {
+    background: transparent;
+    cursor: default;
+    box-shadow: none;
+    border: none;
+}
+
+.dia-hoje {
+    background: linear-gradient(135deg, rgba(119, 50, 184, 0.2), rgba(106, 27, 154, 0.3)) !important;
+    color: #7732b8 !important;
+    font-weight: 700;
+    border: 2px solid rgba(119, 50, 184, 0.5) !important;
+    box-shadow: 0 2px 8px rgba(119, 50, 184, 0.2);
+}
+
+.dia-hoje .numero-dia {
+    color: #7732b8;
+}
+
+.dia-selecionado {
+    background: linear-gradient(135deg, rgba(106, 27, 154, 0.15), rgba(74, 20, 140, 0.25)) !important;
+    color: #6a1b9a !important;
+    font-weight: 700;
+    border: 2px solid rgba(106, 27, 154, 0.4) !important;
+    box-shadow: 0 2px 8px rgba(106, 27, 154, 0.15);
+}
+
+/* --- EVENTOS NOS DIAS --- */
+.evento-item {
+    background: rgba(255, 255, 255, 0.95);
+    border-radius: 4px;
+    padding: 2px 6px;
+    margin: 1px 0;
+    font-size: 10px;
+    font-weight: 500;
+    text-align: left;
+    width: 100%;
+    box-sizing: border-box;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    border-left: 3px solid;
+}
+
+.evento-item.orange {
+    background: #fff3cd;
+    color: #856404;
+    border-left-color: #ffc107;
+}
+
+.evento-item.pink {
+    background: #f8d7da;
+    color: #721c24;
+    border-left-color: #dc3545;
+}
+
+.evento-item.blue {
+    background: #cce5ff;
+    color: #004085;
+    border-left-color: #007bff;
+}
+
+.evento-item.green {
+    background: #d4edda;
+    color: #155724;
+    border-left-color: #28a745;
+}
+
+.evento-item.purple {
+    background: #e2e3f3;
+    color: #383d41;
+    border-left-color: #6c757d;
+}
+
+/* --- LISTA DE EVENTOS DO DIA (NOVO ESTILO) --- */
+#eventos-dia-container {
+    margin-top: 30px;
+    border-top: 1px solid #E1E1E1;
+    padding-top: 20px;
+}
+
+#eventos-dia-container h3 {
+    margin-top: 0;
+    margin-bottom: 20px;
+    font-size: 18px;
+    font-weight: 600;
+}
+
+#lista-eventos {
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+}
+
+.evento-item {
+    display: flex;
+    align-items: stretch;
+    background-color: #fff;
+    border: 1px solid #E1E1E1;
+    border-left: 5px solid #6264A7;
+    border-radius: 8px;
+    box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
+    transition: box-shadow 0.2s ease-in-out;
+    overflow: hidden;
+}
+
+.evento-item:hover {
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.08);
+}
+
+.evento-horario {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 15px 20px;
+    background-color: #F8F8F8;
+    font-weight: 600;
+    color: #333;
+    min-width: 90px;
+}
+
+.evento-horario .fa-clock {
+    font-size: 1.3em;
+    margin-bottom: 5px;
+    color: #6264A7;
+}
+
+.evento-detalhes {
+    flex-grow: 1;
+    padding: 15px 20px;
+}
+
+.evento-detalhes h4 {
+    margin: 0 0 5px 0;
+    font-size: 16px;
+    font-weight: 600;
+    color: #333;
+}
+
+.evento-detalhes p {
+    margin: 0;
+    font-size: 14px;
+    color: #666;
+}
+
+.evento-acoes {
+    display: flex;
+    align-items: center;
+    padding: 0 20px;
+    gap: 15px;
+}
+
+.evento-acoes button {
+    background: none;
+    border: none;
+    cursor: pointer;
+    font-size: 16px;
+    color: #888;
+    padding: 5px;
+    transition: color 0.2s ease;
+}
+
+.evento-acoes .btn-acao-editar:hover {
+    color: #6264A7;
+}
+
+.evento-acoes .btn-acao-excluir:hover {
+    color: #D83B01;
+}
+
+.nenhum-evento {
+    text-align: center;
+    color: #888;
+    padding: 20px;
+    background-color: #F9F9F9;
+    border-radius: 5px;
+    border: 1px dashed #E1E1E1;
+}
+
+/* --- NOVA ESTILIZAÇÃO DO MODAL --- */
+
+.modal {
+    display: none;
+    position: fixed;
+    z-index: 1001;
+    left: 0;
+    top: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0, 0, 0, 0.6);
+    backdrop-filter: blur(8px);
+    -webkit-backdrop-filter: blur(8px);
+    animation: fadeIn 0.3s ease;
+    justify-content: center;
+    align-items: center;
+    padding: 20px;
+    box-sizing: border-box;
+    overflow-y: auto;
+}
+
+.modal-content {
+    background: #ffffff;
+    margin: auto;
+    width: 480px;
+    max-width: 90vw;
+    max-height: 90vh;
+    border-radius: 16px;
+    box-shadow: 0 15px 40px rgba(0, 0, 0, 0.15), 0 0 0 1px rgba(255, 255, 255, 0.05);
+    padding: 0;
+    overflow: hidden;
+    animation: slideUp 0.3s ease;
+    border: 1px solid rgba(106, 27, 154, 0.1);
+    position: relative;
+    display: flex;
+    flex-direction: column;
+}
+
+.modal-content h3 {
+    padding: 18px 24px;
+    margin: 0;
+    font-size: 20px;
+    font-weight: 700;
+    background: linear-gradient(135deg, rgba(106, 27, 154, 0.1), rgba(74, 20, 140, 0.05));
+    border-bottom: 1px solid rgba(106, 27, 154, 0.1);
+    color: #6a1b9a;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+}
+
+.modal-content p {
+    padding: 12px 24px;
+    margin: 0;
+    color: #7732b8;
+    font-size: 15px;
+    font-weight: 500;
+    background: rgba(106, 27, 154, 0.03);
+    border-bottom: 1px solid rgba(106, 27, 154, 0.1);
+}
+
+#form-evento {
+    padding: 24px;
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    overflow-y: auto;
+    flex: 1;
+    align-items: center;
+}
+
+#form-evento label {
+    font-size: 15px;
+    font-weight: 600;
+    color: #6a1b9a;
+    margin-bottom: -6px;
+    font-family: 'Poppins', sans-serif;
+    width: 100%;
+    max-width: 400px;
+    text-align: left;
+}
+
+#form-evento input[type="text"],
+#form-evento input[type="time"],
+#form-evento textarea {
+    width: 100%;
+    max-width: 400px;
+    padding: 12px 14px;
+    border: 2px solid #e8e8e8;
+    border-radius: 8px;
+    font-size: 15px;
+    font-family: 'Poppins', sans-serif;
+    box-sizing: border-box;
+    transition: all 0.3s ease;
+    background-color: #fafafa;
+    resize: none;
+}
+
+#form-evento input[type="text"]:focus,
+#form-evento input[type="time"]:focus,
+#form-evento textarea:focus {
+    outline: none;
+    border-color: #6a1b9a;
+    background-color: #ffffff;
+    box-shadow: 0 0 0 3px rgba(106, 27, 154, 0.1), 0 2px 8px rgba(106, 27, 154, 0.15);
+    transform: translateY(-1px);
+}
+
+.modal-actions {
+    display: flex;
+    justify-content: center;
+    gap: 10px;
+    margin-top: 16px;
+}
+
+/* --- BOTÕES DO MODAL --- */
+#form-evento button[type="submit"] {
+    background: linear-gradient(to right, #6a1b9a, #4a148c);
+    color: white;
+    border: none;
+    padding: 10px 20px;
+    border-radius: 8px;
+    font-weight: 600;
+    font-size: 15px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    font-family: 'Poppins', sans-serif;
+}
+
+#form-evento button[type="submit"]:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 15px rgba(74, 20, 140, 0.4);
+    background: linear-gradient(to right, #7b1fa2, #5e35b1);
+}
+
+#form-evento button[type="button"] {
+    background: #f8f9fa;
+    color: #666;
+    border: 2px solid #e0e0e0;
+    padding: 10px 20px;
+    border-radius: 8px;
+    font-weight: 600;
+    font-size: 15px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    font-family: 'Poppins', sans-serif;
+}
+
+#form-evento button[type="button"]:hover {
+    background: #e9ecef;
+    border-color: #6a1b9a;
+    color: #6a1b9a;
+    transform: translateY(-1px);
+}
+
+/* --- ANIMAÇÕES DO MODAL --- */
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+    }
+
+    to {
+        opacity: 1;
+    }
+}
+
+@keyframes slideUp {
+    from {
+        opacity: 0;
+        transform: translateY(30px) scale(0.95);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0) scale(1);
+    }
+}
+
+#notification-popup {
+    position: fixed;
+    top: 20px;
+    right: 20px;
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    color: white;
+    padding: 16px 24px;
+    border-radius: 12px;
+    box-shadow: 0 8px 25px rgba(102, 126, 234, 0.3);
+    z-index: 1000;
+    display: none;
+    font-weight: 600;
+}
+
+/* --- RESPONSIVIDADE --- */
+@media (max-width: 1024px) {
+    .main-content {
+        padding: 16px 20px;
+    }
+
+    .agenda-container {
+        padding: 24px;
+        border-radius: 12px;
+    }
+
+    .main-header h2 {
+        font-size: 28px;
+    }
+
+    .dia-mes {
+        min-height: 80px;
+        font-size: 14px;
+    }
+}
+
+@media (max-width: 768px) {
+    .main-content {
+        padding: 12px 16px;
+    }
+
+    .agenda-container {
+        padding: 20px;
+        border-radius: 8px;
+    }
+
+    .main-header {
+        flex-direction: column;
+        gap: 16px;
+        align-items: flex-start;
+    }
+
+    .header-right {
+        width: 100%;
+    }
+
+    .navigation-buttons {
+        flex-wrap: wrap;
+        justify-content: center;
+        padding: 6px;
+    }
+
+    .calendario-grid {
+        gap: 4px;
+    }
+
+    .dias-semana-grid {
+        gap: 4px;
+    }
+
+    .dia-mes {
+        min-height: 60px;
+        padding: 6px 4px;
+        font-size: 13px;
+    }
+
+    .evento-item {
+        font-size: 9px;
+        padding: 1px 4px;
+    }
+}
+
+@media (max-width: 480px) {
+    .main-header h2 {
+        font-size: 24px;
+    }
+
+    .btn {
+        padding: 8px 12px;
+        font-size: 13px;
+    }
+
+    .btn-primary {
+        padding: 10px 16px;
+    }
+
+    .dia-mes {
+        min-height: 50px;
+        padding: 4px 2px;
+        font-size: 12px;
+    }
+
+    .dia-semana {
+        font-size: 11px;
+        padding: 8px 0;
+    }
+
+    .evento-item {
+        font-size: 8px;
+        padding: 1px 3px;
+    }
+
+    /* Modal responsivo */
+    .modal {
+        padding: 10px;
+    }
+
+    .modal-content {
+        width: 95vw;
+        max-height: 85vh;
+    }
+
+    .modal-content h3 {
+        padding: 20px 24px;
+        font-size: 18px;
+    }
+
+    .modal-content p {
+        padding: 12px 24px;
+        font-size: 14px;
+    }
+
+    #form-evento {
+        padding: 24px;
+        gap: 16px;
+    }
+
+    #form-evento button[type="submit"],
+    #form-evento button[type="button"] {
+        padding: 12px 20px;
+        font-size: 14px;
+    }
+}
+

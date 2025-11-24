@@ -1,0 +1,319 @@
+/* Importar Poppins do Google Fonts */
+@import url('https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap');
+@import url('https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css');
+
+/* Fonte global */
+body {
+    font-family: 'Poppins', 'Segoe UI', sans-serif;
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box; /* Adicionado para evitar problemas de dimensionamento */
+}
+
+/* Layout de duas colunas */
+.main-container {
+    display: flex;
+    height: 100vh;
+    width: 100%;
+}
+
+/* Painel esquerdo */
+.left-panel {
+    width: 50%;
+    display: flex;
+    flex-direction: column;
+    align-items: center; /* Centraliza o conteúdo horizontalmente */
+    justify-content: center; /* Centraliza o conteúdo verticalmente */
+    padding: 0 5%;
+    background: #fff;
+    text-align: center; /* Centraliza o texto */
+}
+
+/* Painel direito */
+.right-panel {
+    width: 50%;
+    position: relative;
+    background-color: #4b0082;
+    overflow: hidden;
+}
+
+/* Navegação */
+.nav-links {
+    display: flex;
+    gap: 30px;
+    margin-top: 20px; /* Margem ajustada */
+}
+
+.nav-link {
+    color: #4a0f81;
+    text-decoration: none;
+    font-size: 1.2rem;
+    font-weight: 600;
+    padding: 5px 10px;
+    border-bottom: 2px solid transparent;
+    transition: all 0.3s ease;
+}
+
+.nav-link:hover, .nav-link.active {
+    border-bottom-color: #4a0f81;
+}
+
+/* Cabeçalho e Títulos */
+.header-logo {
+    margin-bottom: 40px; /* Espaço entre a logo e o texto */
+}
+
+.recsenha {
+    font-size: 2.5rem;
+    color: #4a0f81;
+    font-weight: 700;
+    margin-bottom: 20px; /* Espaço para o parágrafo */
+    margin-top: 0; /* Removido margem fixa */
+    margin-left: 40px;
+}
+
+.textbox {
+    color: #888;
+    font-size: 1.1rem;
+    margin-bottom: 40px; /* Espaço para o campo de input */
+    max-width: 400px;
+    margin-left: 20px;
+}
+
+/* Botão enviar */
+.inputSubmit {
+    background: linear-gradient(to right, #6a1b9a, #4a148c);
+    color: #fff;
+    font-weight: 600;
+    font-size: 1.1rem;
+    cursor: pointer;
+    border: none;
+    padding: 16px;
+    border-radius: 12px;
+    width: 100%;
+    max-width: 400px;
+    transition: all 0.3s ease;
+    box-shadow: 0 4px 10px rgba(74, 20, 140, 0.3);
+    text-align: center;
+    margin-top: 40px; /* Espaço do input */
+    margin-left: 30px;
+}
+
+.inputSubmit:hover {
+    transform: scale(1.05);
+    box-shadow: 0 6px 15px rgba(74, 20, 140, 0.5);
+    background: linear-gradient(to right, #7b1fa2, #5e35b1);
+}
+
+/* Campo de input unificado */
+.input-email {
+    position: relative;
+    width: 100%;
+    max-width: 400px;
+}
+
+.input-email input {
+    width: 100%;
+    padding: 15px 15px 15px 50px; /* espaço pro ícone */
+    background: #f3e8ff;
+    border: none;
+    border-radius: 10px;
+    font-size: 1rem;
+    color: #4a0f81;
+    transition: all 0.3s ease;
+    outline: none;
+}
+
+.input-email input:focus {
+    background: #fff;
+    box-shadow: 0 0 8px rgba(142, 12, 202, 0.5);
+    border: 2px solid #8e24aa;
+}
+
+.input-email input::placeholder {
+    color: #8e24aa;
+    transition: color 0.3s ease;
+}
+
+.input-email input:focus::placeholder {
+    color: #b85cff;
+}
+
+/* Ícone dentro do input */
+.input-email::before {
+    content: "\f0e0"; /* envelope */
+    font-family: "Font Awesome 6 Free";
+    font-weight: 900;
+    position: absolute;
+    top: 50%;
+    left: 15px;
+    transform: translateY(-50%);
+    color: #8e24aa;
+    font-size: 1.2rem;
+    pointer-events: none;
+}
+
+/* Logo */
+.logo {
+    width: 500px;
+    margin-bottom: -260px;
+    margin-left: 100px;
+}
+
+/* Imagem do Painel Direito */
+.right-panel img {
+    position: absolute;
+    width: 890px;
+    right: 0;
+    z-index: 1; /* Garante que a imagem fique sobre o fundo */
+    margin-top: -60px;
+}
+
+/* Link "Voltar para o login" */
+.forgot {
+    color: #4a0f81;
+    text-decoration: none;
+    font-size: 0.9rem;
+    transition: color 0.3s, background 0.3s;
+    border-radius: 3px;
+    padding: 2px 8px;
+    line-height: 1.5;
+    display: inline-block;
+    margin-top: 15px;
+    margin-left: 20px;
+}
+
+.forgot:hover {
+    color: #fff;
+    background: rgba(106, 27, 154, 0.7);
+    text-decoration: none;
+}
+
+.error-message {
+    color: #888;
+    font-size: 1.1rem;
+    margin-bottom: 40px; /* Espaço para o campo de input */
+    max-width: 400px;
+    margin-left: 20px;
+}
+
+/* --- Media Queries para Responsividade --- */
+
+/* Telas até 768px (tablets e celulares grandes) */
+@media (max-width: 768px) {
+    .main-container {
+        flex-direction: column;
+        height: auto;
+    }
+
+    .left-panel, .right-panel {
+        width: 100%;
+        height: auto;
+    }
+
+    .left-panel {
+        padding: 40px 20px;
+    }
+
+    .right-panel {
+        display: none;
+    }
+
+    .logo {
+        width: 300px;
+        margin-left: 0;
+        margin-bottom: 20px;
+    }
+
+    .recsenha {
+        font-size: 2rem;
+        margin-left: 0;
+    }
+
+    .textbox {
+        font-size: 1rem;
+        max-width: 100%;
+        margin-left: 0;
+    }
+
+    .inputSubmit {
+        width: 100%;
+        max-width: 100%;
+        margin-left: 0;
+    }
+
+    .input-email {
+        width: 100%;
+    }
+
+    .input-email input {
+        width: 100%;
+        max-width: 100%;
+    }
+
+    .nav-links {
+        flex-direction: column;
+        margin-top: 15px;
+        gap: 15px;
+    }
+
+    .forgot {
+        margin-left: 0;
+        text-align: center;
+        margin-top: 20px;
+    }
+
+    .error-message {
+        font-size: 1rem;
+        margin-left: 0;
+    }
+}
+
+/* Telas até 576px (celulares pequenos) */
+@media (max-width: 576px) {
+    .logo {
+        width: 250px;
+        margin-left: 0;
+        margin-bottom: 10px;
+    }
+
+    .recsenha {
+        font-size: 1.8rem;
+    }
+
+    .textbox {
+        font-size: 0.9rem;
+    }
+
+    .inputSubmit {
+        font-size: 1rem;
+    }
+
+    .input-email input {
+        font-size: 1rem;
+    }
+
+    .nav-links {
+        flex-direction: column;
+        gap: 10px;
+    }
+
+    .forgot {
+        font-size: 0.8rem;
+    }
+}
+
+.input-email input[type="password"] {
+    padding-right: 50px !important;
+}
+
+
+.input-email .password-toggle-icon {
+    position: absolute;
+    right: 20px;
+    top: 50%;
+    transform: translateY(-50%);
+    color: #8e24aa; 
+    cursor: pointer;
+    z-index: 10;
+}

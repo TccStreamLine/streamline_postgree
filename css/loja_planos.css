@@ -1,0 +1,255 @@
+/* ================================================= */
+/* == ESTILOS PARA A TELA DE SELEÇÃO DE PLANOS    == */
+/* ================================================= */
+
+.upgrade-container {
+    max-width: 1100px;
+    margin: 0 auto;
+    padding: 1rem;
+}
+
+.upgrade-header {
+    text-align: center;
+    margin-bottom: 3rem;
+}
+.upgrade-header h1 {
+    font-size: 2.2rem;
+    font-weight: 700;
+    color: #4C1D95;
+    margin-bottom: 0.5rem;
+}
+.upgrade-header p {
+    font-size: 1.1rem;
+    color: #6B7280;
+}
+
+.pricing-plans {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 2rem;
+}
+
+.plan-card {
+    background-color: #EDE9FE;
+    color: #4C1D95;
+    border-radius: 12px;
+    padding: 2.5rem 2rem;
+    display: flex;
+    flex-direction: column;
+    text-align: center;
+    border: 2px solid transparent;
+}
+.plan-card h4 {
+    font-size: 1.5rem;
+    font-weight: 700;
+    margin-bottom: 1rem;
+}
+.plan-card p {
+    font-size: 1rem;
+    color: #5B21B6;
+    flex-grow: 1;
+    margin-bottom: 2rem;
+}
+.plan-card .price, .plan-card .price-free {
+    font-size: 2.5rem;
+    font-weight: 700;
+    margin-bottom: 2rem;
+}
+.plan-card .price span {
+    font-size: 1rem;
+    font-weight: 500;
+}
+.plan-card.pro {
+    background-color: #4C1D95;
+    color: white;
+    position: relative;
+    transform: scale(1.05);
+}
+.plan-card.pro p { color: #DDD6FE; }
+.plan-card.pro .recommended-badge {
+    position: absolute;
+    top: -15px;
+    left: 50%;
+    transform: translateX(-50%);
+    background: #4C1D95;
+    color: white;
+    padding: 0.5rem 1rem;
+    border-radius: 20px;
+    font-size: 0.9rem;
+    font-weight: 600;
+    border: 2px solid #fff;
+}
+.plan-card .plan-button {
+    text-decoration: none;
+    display: block;
+    text-align: center;
+    padding: 1rem;
+    border-radius: 8px;
+    font-weight: 600;
+    font-size: 1rem;
+    border: 2px solid #4C1D95;
+    color: #4C1D95;
+    background: white;
+}
+.plan-card.pro .plan-button {
+    background: white;
+    color: #4C1D95;
+}
+.plan-card .current-plan-btn {
+    background-color: #4C1D95;
+    color: white;
+    border: none;
+    cursor: default;
+}
+
+/* ================================================= */
+/* == ESTILOS PARA A TELA DE PAGAMENTO (FIGMA)    == */
+/* ================================================= */
+
+.pagamento-container-figma {
+    display: flex;
+    gap: 0;
+    width: 100%;
+    background-color: #FFFFFF;
+    border-radius: 16px;
+    box-shadow: var(--card-shadow);
+    overflow: hidden;
+}
+
+/* Coluna da Esquerda */
+.resumo-plano-figma {
+    flex: 0 0 40%;
+    padding: 2.5rem;
+    border-right: 1px solid #E5E7EB;
+}
+.resumo-plano-figma h2 {
+    font-size: 1.25rem;
+    font-weight: 700;
+    color: #4C1D95;
+    margin-bottom: 0.5rem;
+}
+.preco-resumo-figma {
+    font-size: 2.5rem;
+    font-weight: 700;
+    color: #1F2937;
+    margin-bottom: 2rem;
+}
+.preco-resumo-figma span {
+    font-size: 1rem;
+    font-weight: 500;
+    color: #6B7280;
+}
+.linha-detalhe-figma {
+    display: flex;
+    justify-content: space-between;
+    margin-bottom: 1rem;
+    font-size: 0.9rem;
+    color: #6B7280;
+}
+.detalhes-cobranca-figma {
+    padding-bottom: 1.5rem;
+    border-bottom: 1px solid #E5E7EB;
+    margin-bottom: 1.5rem;
+}
+.total-devido-figma {
+    display: flex;
+    justify-content: space-between;
+    padding-top: 1.5rem;
+    border-top: 1px solid #E5E7EB;
+    font-weight: 700;
+    font-size: 1.1rem;
+}
+.btn-assinar-figma {
+    width: 100%;
+    background: #4C1D95;
+    color: white;
+    padding: 1rem;
+    border: none;
+    border-radius: 8px;
+    font-size: 1.1rem;
+    font-weight: 600;
+    cursor: pointer;
+    margin-top: 2rem;
+}
+
+/* Coluna da Direita */
+.detalhes-pagamento-figma {
+    flex: 1;
+    padding: 2.5rem;
+}
+.detalhes-pagamento-figma h3 {
+    font-size: 0.9rem;
+    text-transform: uppercase;
+    color: #6D28D9;
+    letter-spacing: 1px;
+    margin: 2rem 0 1.5rem 0;
+    font-weight: bold;
+}
+.detalhes-pagamento-figma h3:first-child {
+    margin-top: 0;
+}
+
+/* NOVO ESTILO DO CARTÃO */
+.payment-card-group {
+    border: 1px solid #EDE9FE;
+    border-radius: 12px;
+    overflow: hidden;
+}
+.payment-method-box {
+    border-bottom: 1px solid #EDE9FE;
+    background-color: #F5F3FF;
+    padding: 0.9rem;
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    color: #4C1D95;
+    font-weight: 500;
+}
+.card-details-inputs {
+    padding: 1.5rem;
+    background-color: white;
+}
+.card-details-inputs .input-wrapper-figma {
+    margin-bottom: 1.5rem;
+}
+.card-details-inputs .input-wrapper-figma:last-child {
+    margin-bottom: 0;
+}
+
+
+.input-wrapper-figma label {
+    display: block;
+    font-size: 0.9rem;
+    font-weight: 500;
+    color: #374151;
+    margin-bottom: 0.5rem;
+}
+.input-wrapper-figma input {
+    width: 100%;
+    padding: 0.9rem;
+    border: 1px solid #D1D5DB;
+    border-radius: 8px;
+    font-size: 1rem;
+    box-sizing: border-box;
+}
+.input-wrapper-figma input:focus {
+    outline: none;
+    border-color: #6D28D9;
+    box-shadow: 0 0 0 2px rgba(109, 40, 217, 0.2);
+}
+.input-row-figma {
+    display: flex;
+    gap: 1.5rem;
+}
+.input-row-figma > .input-wrapper-figma {
+    flex: 1;
+}
+
+/* Responsividade */
+@media (max-width: 992px) {
+    .pricing-plans, .pagamento-container-figma {
+        grid-template-columns: 1fr;
+        flex-direction: column;
+    }
+    .plan-card.pro { transform: scale(1); }
+}

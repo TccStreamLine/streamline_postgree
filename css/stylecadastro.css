@@ -1,0 +1,257 @@
+@import url('https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap');
+@import url('https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css');
+
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+body {
+    font-family: 'Poppins', 'Segoe UI', sans-serif;
+    margin: 0;
+    padding: 0;
+    background-color: #ffffff;
+    overflow-x: hidden;
+}
+
+.main-container {
+    display: flex;
+    min-height: 100vh;
+    width: 100%;
+}
+
+.left-panel {
+    width: 50%;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    padding: 2rem 5%;
+    position: relative;
+    background: #fff;
+    text-align: center;
+    box-sizing: border-box;
+}
+
+.right-panel {
+    width: 50%;
+    position: relative;
+    background-color: #4b0082;
+    overflow: hidden;
+}
+.right-panel::before,
+.right-panel::after {
+    content: '';
+    position: absolute;
+    width: 150%;
+    height: 200px;
+    background: linear-gradient(135deg, rgba(123, 31, 162, 0.7), rgba(74, 20, 140, 0.7));
+    border-radius: 100px;
+    transform: rotate(45deg);
+    box-shadow: 0 0 50px rgba(0,0,0,0.1);
+    opacity: 0.8;
+    left: -25%;
+}
+.right-panel::before { top: 10%; }
+.right-panel::after {
+    bottom: 10%;
+    background: linear-gradient(135deg, rgba(142, 36, 170, 0.7), rgba(74, 20, 140, 0.7));
+}
+.right-panel img { display: none; }
+
+.header-logo {
+    position: absolute;
+    top: 30px;
+    left: 30px;
+    z-index: 10;
+}
+.logo { width: 250px; }
+
+.nav-links {
+    position: absolute;
+    top: 30px;
+    right: 5%;
+    display: flex;
+    gap: 30px;
+    z-index: 100;
+}
+.nav-link {
+    color: #4a0f81;
+    text-decoration: none;
+    font-size: 1.2rem;
+    font-weight: 600;
+    padding: 5px 10px;
+    border-bottom: 2px solid transparent;
+    transition: border-bottom-color 0.3s ease;
+}
+.nav-link:hover,
+.nav-link.active { border-bottom-color: #4a0f81; }
+
+.login-content {
+    display: flex;
+    justify-content: center;
+    width: 100%;
+    margin-top: 50px;
+    z-index: 5;
+}
+form { width: 100%; max-width: 600px; }
+fieldset { border: none; padding: 0; }
+
+.legenda {
+    font-size: 3rem;
+    color: #4a0f81;
+    font-weight: 700;
+    margin-bottom: 5px;
+}
+.cadastro-slogan {
+    font-size: 1.1rem;
+    color: #888;
+    margin-bottom: 40px;
+}
+
+.form-row-group {
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+}
+.form-row {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 20px;
+    justify-content: space-between;
+}
+.form-group {
+    flex: 1;
+    min-width: calc(50% - 10px);
+    display: flex;
+    flex-direction: column;
+}
+
+.inputBox { position: relative; width: 100%; }
+
+.inputUser,
+select {
+    width: 100%;
+    padding: 15px 15px 15px 50px;
+    background: #f3e8ff;
+    border: 2px solid transparent;
+    border-radius: 10px;
+    font-size: 1rem;
+    color: #4a0f81;
+    outline: none;
+    box-sizing: border-box;
+    transition: background-color 0.3s ease, border-color 0.3s ease;
+}
+
+.inputUser:focus,
+select:focus {
+    background: #fff;
+    border: 2px solid #8e24aa;
+}
+
+.inputUser::placeholder { color: #8e24aa; transition: color 0.3s ease; }
+.inputUser:focus::placeholder { color: #b85cff; }
+
+.inputBox .icon {
+    position: absolute;
+    left: 15px;
+    top: 50%;
+    transform: translateY(-50%);
+    color: #8e24aa;
+    font-size: 1.1rem;
+}
+
+select {
+    -webkit-appearance: none;
+    -moz-appearance: none;
+    appearance: none;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='%238A2BE2'%3E%3Cpath d='M7 10l5 5 5-5z'/%3E%3C/svg%3E");
+    background-repeat: no-repeat;
+    background-position: right 10px center;
+    background-size: 1rem;
+    cursor: pointer;
+}
+select:required:invalid { color: #8e24aa; }
+select option[value=""] { color: #8e24aa; }
+select option { color: #4a0f81; }
+
+#submit {
+    background: linear-gradient(to right, #6a1b9a, #4a148c);
+    color: #fff;
+    font-weight: 600;
+    font-size: 1.1rem;
+    cursor: pointer;
+    border: none;
+    padding: 16px;
+    border-radius: 12px;
+    margin: 30px auto 15px;
+    width: 70%;
+    max-width: 400px;
+    display: block;
+    transition: all 0.3s ease;
+    box-shadow: 0 4px 10px rgba(74, 20, 140, 0.3);
+}
+#submit:hover {
+    transform: scale(1.05);
+    box-shadow: 0 6px 15px rgba(74, 20, 140, 0.5);
+    background: linear-gradient(to right, #7b1fa2, #5e35b1);
+}
+
+.makelogin {
+    color: #4a0f81;
+    text-decoration: none;
+    font-size: 0.9rem;
+    transition: color 0.3s, background 0.3s;
+    border-radius: 3px;
+    padding: 2px 8px;
+    line-height: 1.5;
+    display: inline-block;
+    vertical-align: middle;
+}
+.makelogin:hover {
+    color: #fff;
+    background: rgba(106, 27, 154, 0.7);
+    text-decoration: none;
+}
+
+.inputBox input[name="senha"] { padding-right: 50px !important; }
+.inputBox .password-toggle-icon {
+    position: absolute;
+    right: 15px;
+    top: 50%;
+    transform: translateY(-50%);
+    color: #8e24aa;
+    cursor: pointer;
+    z-index: 10;
+}
+
+@media (max-width: 992px) {
+    .main-container { flex-direction: column; height: auto; }
+    .left-panel, .right-panel { width: 100%; }
+    .right-panel { display: none; }
+    .left-panel { padding: 40px 20px; }
+    .nav-links { position: static; order: -1; width: 100%; justify-content: center; padding: 15px 0; }
+    .header-logo { position: static; text-align: center; margin-bottom: 20px; }
+    .login-content { margin-top: 0; }
+    .legenda { font-size: 2.5rem; }
+}
+
+@media (max-width: 768px) {
+    .form-row { flex-direction: column; gap: 15px; }
+    .form-group { min-width: 100%; }
+    .legenda { font-size: 2rem; }
+    .cadastro-slogan { text-align: center; justify-content: center; margin-left: 0; }
+    #submit { width: 100%; }
+}
+
+@media (max-width: 576px) {
+    .logo { width: 200px; }
+    .legenda { font-size: 1.8rem; }
+    .nav-links { gap: 10px; flex-wrap: wrap; }
+    .nav-link { font-size: 1rem; }
+    .inputUser, select { padding: 14px 14px 14px 45px; font-size: 0.95rem; }
+    .inputBox .icon { left: 12px; }
+    #submit { padding: 14px; font-size: 1rem; }
+    .inputBox .password-toggle-icon { right: 12px; }
+}

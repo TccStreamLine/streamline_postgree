@@ -1,0 +1,97 @@
+
+.form-produto-container {
+    background: #FFFFFF; /* Fundo branco como no protótipo */
+    border-radius: 16px;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.08);
+    padding: 40px 48px;
+    max-width: 950px;
+    margin: 2.5rem auto;
+    border: 1px solid #E5E7EB; /* Borda sutil */
+}
+
+.form-produto-title {
+    color: #1F2937; /* Cor de texto padrão mais escura */
+    font-size: 1.5rem;
+    font-weight: 600;
+    margin-bottom: 2.5rem;
+    text-align: center;
+    letter-spacing: 0.5px;
+    text-transform: uppercase;
+}
+
+/* A CORREÇÃO PRINCIPAL ESTÁ AQUI */
+.form-produto-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr; /* Cria as duas colunas */
+    gap: 1.5rem 2rem; /* Espaçamento entre os campos */
+    width: 100%;
+}
+
+.form-produto-group {
+    display: flex;
+    flex-direction: column;
+}
+
+.form-produto-group label {
+    color: #6B7280; /* Cinza para o label */
+    font-size: 0.9rem;
+    font-weight: 500;
+    margin-bottom: 8px;
+}
+
+.form-produto-group input,
+.form-produto-group select {
+    padding: 16px;
+    border-radius: 10px;
+    border: 1px solid transparent; /* Borda transparente inicial */
+    background: #F3F4F6; /* Cinza clarinho dos campos */
+    font-size: 1rem;
+    color: #1F2937;
+    outline: none;
+    transition: all 0.2s ease;
+    font-family: 'Inter', sans-serif;
+}
+
+.form-produto-group input:focus,
+.form-produto-group select:focus {
+    background: #fff;
+    border-color: #6D28D9; /* Borda roxa ao focar */
+    box-shadow: 0 0 0 3px rgba(109, 40, 217, 0.2);
+}
+
+.form-produto-actions {
+    width: 100%;
+    display: flex;
+    justify-content: center;
+    margin-top: 2.5rem;
+    padding-top: 1.5rem;
+    border-top: 1px solid #E5E7EB;
+}
+
+.btn-produto-primary {
+    background: #6D28D9; /* Cor roxa sólida do protótipo */
+    color: #fff;
+    font-weight: 600;
+    font-size: 1rem;
+    border: none;
+    border-radius: 10px;
+    padding: 16px 0;
+    width: 100%;
+    max-width: 350px;
+    box-shadow: 0 4px 12px rgba(109, 40, 217, 0.3);
+    cursor: pointer;
+    transition: all 0.2s ease;
+    text-transform: uppercase;
+}
+
+.btn-produto-primary:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 16px rgba(109, 40, 217, 0.4);
+    background: #5B21B6; /* Roxo um pouco mais escuro */
+}
+
+@media (max-width: 900px) {
+    .form-produto-grid {
+        grid-template-columns: 1fr; /* Em telas menores, volta para uma coluna */
+    }
+}

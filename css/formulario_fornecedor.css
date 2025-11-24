@@ -1,0 +1,76 @@
+/* css/formulario_figma.css */
+
+.form-container-figma {
+    background-color: white;
+    padding: 2.5rem;
+    border-radius: 16px;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.08);
+    max-width: 700px;
+    margin: 2.5rem auto;
+}
+
+.form-title-figma {
+    text-align: center;
+    font-size: 1.6rem;
+    font-weight: 700;
+    color: #374151; /* Cinza escuro */
+    margin-bottom: 2.5rem;
+    letter-spacing: 1px;
+}
+
+.input-group-figma {
+    display: flex;
+    align-items: center;
+    background-color: #F3F4F6; /* Cinza claro de fundo */
+    border-radius: 10px;
+    padding: 0 1rem;
+    margin-bottom: 1.5rem;
+    border: 2px solid transparent;
+    transition: all 0.2s ease;
+}
+
+.input-group-figma:focus-within {
+    background-color: white;
+    border-color: #6D28D9; /* Roxo */
+    box-shadow: 0 0 0 3px rgba(109, 40, 217, 0.2);
+}
+
+.input-group-figma i {
+    color: #9CA3AF; /* Ícone cinza */
+    font-size: 1rem;
+    margin-right: 0.8rem;
+}
+
+.input-group-figma input {
+    width: 100%;
+    border: none;
+    background: none;
+    outline: none;
+    padding: 1rem 0;
+    font-size: 1rem;
+    font-family: 'Inter', sans-serif;
+    color: #1F2937;
+}
+
+.form-actions-figma {
+    text-align: center;
+    margin-top: 2rem;
+}
+
+.btn-figma-primary {
+    background: #6D28D9; /* Roxo */
+    color: white;
+    font-weight: 600;
+    font-size: 1rem;
+    border: none;
+    border-radius: 10px;
+    padding: 1rem 0;
+    width: 100%;
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+.btn-figma-primary:hover {
+    background: #5B21B6; /* Roxo mais escuro */
+    transform: translateY(-2px);
+}

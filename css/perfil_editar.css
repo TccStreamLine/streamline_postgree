@@ -1,0 +1,137 @@
+@import url('perfil.css');
+
+.profile-form .form-field {
+    background-color: transparent;
+    padding: 0;
+    border: none;
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 0.5rem;
+    min-height: auto;
+}
+
+.profile-form label {
+    font-size: 0.85rem;
+    color: var(--text-color);
+    font-weight: 600;
+    margin-bottom: 0;
+}
+
+.profile-form .input-wrapper {
+    width: 100%;
+    display: flex;
+    align-items: center;
+    background-color: #F8F7FF;
+    border: 1px solid #EDE9FE;
+    border-radius: 10px;
+    padding: 0 1rem;
+    transition: all 0.2s ease;
+}
+
+.profile-form .input-wrapper:focus-within {
+    border-color: var(--accent-color);
+    background-color: #fff;
+    box-shadow: 0 0 0 3px rgba(109, 40, 217, 0.15);
+}
+
+.profile-form .input-wrapper i {
+    color: var(--accent-color);
+    font-size: 1.1rem;
+    margin-right: 0.8rem;
+}
+
+.profile-form .input-wrapper input,
+.profile-form .input-wrapper select {
+    width: 100%;
+    border: none;
+    background: none;
+    outline: none;
+    padding: 0.8rem 0;
+    font-size: 1rem;
+    font-weight: 500;
+    color: var(--text-color);
+    font-family: 'Inter', sans-serif;
+}
+
+.profile-form .field-nome-empresa {
+    background-color: transparent;
+    padding: 0;
+    border: none;
+}
+.profile-form .field-nome-empresa .input-wrapper {
+    background-color: #F8F7FF;
+    border: 1px solid #EDE9FE;
+    border-radius: 10px;
+    padding: 0 1rem;
+}
+
+.profile-form .form-field-placeholder {
+    visibility: hidden;
+    background: none;
+    border: none;
+}
+
+.profile-picture-placeholder small {
+    display: none;
+}
+
+.profile-picture-placeholder .initial-icon {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    width: 100%;
+    height: 100%;
+}
+.profile-picture-placeholder .initial-icon i {
+    font-size: 3rem;
+    margin-bottom: 0.5rem;
+}
+.profile-picture-placeholder .initial-icon span {
+    display: none;
+}
+
+.profile-picture-placeholder .change-pic-overlay {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0, 0, 0, 0.5);
+    color: white;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.5rem;
+    opacity: 0;
+    transition: opacity 0.3s ease;
+    border-radius: 50%;
+    pointer-events: none;
+}
+
+.profile-picture-placeholder:hover .change-pic-overlay {
+    opacity: 1;
+}
+
+#profile-pic-preview.profile-picture-img {
+    display: block;
+    position: relative;
+    z-index: 1;
+}
+#profile-pic-preview.profile-picture-img:not([src=""]) + #profile-pic-icon {
+    display: none;
+}
+.profile-picture-placeholder:hover #profile-pic-preview.profile-picture-img + .change-pic-overlay {
+     opacity: 1;
+     z-index: 2;
+}
+.profile-picture-placeholder #profile-pic-preview.profile-picture-img[src=""] + .initial-icon {
+     display: flex;
+}
+.profile-picture-placeholder #profile-pic-preview.profile-picture-img[src=""] ~ .change-pic-overlay {
+     opacity: 0;
+}
+.profile-picture-placeholder:hover #profile-pic-preview.profile-picture-img[src=""] ~ .change-pic-overlay {
+     opacity: 1;
+}
