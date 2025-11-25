@@ -787,3 +787,40 @@ h3,
 .newsletter-btn:hover {
   background: #6b46c1;
 }
+
+@media (max-width: 768px) {
+  /* Remove paddings gigantes do topo */
+  header {
+      padding: 1rem 5%; /* Reduz padding lateral e vertical */
+      position: relative; /* Se estiver fixed, pode estar cobrindo */
+  }
+
+  .home-container {
+      padding-top: 20px; /* Reduz espaço antes do conteúdo */
+  }
+
+  /* Se houver uma imagem de herói muito grande */
+  .hero-section {
+      min-height: auto;
+      padding: 2rem 1rem;
+      text-align: center;
+  }
+
+  .hero-section h1 {
+      font-size: 2rem;
+  }
+
+  /* Garante que a Navbar da Home não fique bugada */
+  .navbar {
+      flex-direction: column;
+      gap: 1rem;
+  }
+  
+  .navbar a {
+      width: 100%;
+      text-align: center;
+      padding: 10px;
+      border: 1px solid #eee;
+      border-radius: 8px;
+  }
+}

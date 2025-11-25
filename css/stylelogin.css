@@ -213,3 +213,46 @@ body {
      .inputSubmit { padding: 14px; font-size: 1rem; }
      .input-group .password-toggle-icon { right: 15px; }
 }
+
+@media (max-width: 768px) {
+    /* Garante que o container ocupe a tela toda */
+    .main-container {
+        height: 100vh;
+        background: #fff;
+    }
+
+    .left-panel {
+        width: 100% !important;
+        padding: 2rem 1.5rem;
+        justify-content: center; /* Centraliza verticalmente */
+    }
+
+    /* Aumenta o conteúdo do login */
+    .login-content {
+        max-width: 100%;
+        margin-top: 0;
+    }
+
+    .main-login-title {
+        font-size: 2.2rem;
+        text-align: center;
+    }
+
+    .login-slogan {
+        text-align: center;
+        margin-bottom: 2rem;
+    }
+
+    /* Inputs maiores e mais fáceis de tocar */
+    .input-group input, 
+    .input-group select {
+        padding: 18px 50px; /* Mais altura para o dedo */
+        font-size: 1rem;
+    }
+
+    .inputSubmit {
+        padding: 18px;
+        font-size: 1.1rem;
+        margin-top: 1rem;
+    }
+}

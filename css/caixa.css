@@ -283,3 +283,45 @@
     cursor: pointer;
     font-size: 1rem;
 }
+
+@media (max-width: 768px) {
+    /* Header do Caixa */
+    .caixa-header {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 1rem;
+    }
+
+    .status-badge {
+        width: 100%;
+        text-align: center;
+        justify-content: center;
+    }
+
+    /* Formulário de Abertura */
+    .caixa-abrir-form {
+        flex-direction: column; /* Empilha input e botão */
+        gap: 1rem;
+    }
+
+    .caixa-abrir-form input,
+    .caixa-abrir-form button {
+        width: 100%;
+        height: 50px; /* Botão maior */
+    }
+
+    /* Cards de Resumo */
+    .resumo-grid {
+        grid-template-columns: 1fr; /* Um card por linha */
+    }
+
+    /* Formulário de Movimentação */
+    .form-movimentacao {
+        grid-template-columns: 1fr; /* Inputs empilhados */
+    }
+
+    .form-movimentacao button {
+        width: 100%;
+        padding: 1rem;
+    }
+}
