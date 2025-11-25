@@ -299,3 +299,35 @@ a.kpi-card.clickable:hover .arrow-icon {
     opacity: 1;
     color: var(--accent-color);
 }
+/* Adicionar ao final de dashboard.css */
+@media (max-width: 768px) {
+    .dashboard-grid {
+        grid-template-columns: 1fr; /* Transforma 3 colunas em 1 */
+        gap: 1rem;
+    }
+
+    /* O gráfico grande e a lista ocupam 100% */
+    .chart-card.large, 
+    .list-card[style*="span 2"] {
+        grid-column: span 1 !important;
+    }
+
+    .kpi-value {
+        font-size: 1.5rem;
+    }
+    
+    /* Chat Flutuante - Ajuste de posição */
+    #chat-launcher {
+        bottom: 1rem;
+        right: 1rem;
+        width: 50px;
+        height: 50px;
+        font-size: 1.5rem;
+    }
+    
+    #chat-container {
+        width: 90%; /* Ocupa quase toda a largura */
+        right: 5%;
+        bottom: 5rem;
+    }
+}
