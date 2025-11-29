@@ -86,9 +86,9 @@ try {
 
 
         // 1. INSERE A VENDA PRINCIPAL
-        // MUDANÇA CRÍTICA: Adicionamos RETURNING id
-        $sql_venda = "INSERT INTO vendas (usuario_id, valor_total, descricao, data_venda, status) 
-                      VALUES (?, ?, ?, ?, 'finalizada') RETURNING id";
+        // MUDANÇA CRÍTICA: Adicionamos RETURNING id para PostgreSQL STATUS
+        $sql_venda = "INSERT INTO vendas (usuario_id, valor_total, descricao, data_venda, \"status\") 
+              VALUES (?, ?, ?, ?, 'finalizada') RETURNING id";
         $stmt_venda = $pdo->prepare($sql_venda);
         $venda_exec_result = $stmt_venda->execute([$usuario_id, $valor_total_venda, $descricao, $data_venda]);
 
