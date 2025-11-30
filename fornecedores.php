@@ -14,7 +14,6 @@ $erro_busca = null;
 $usuario_id = $_SESSION['id'];
 
 try {
-    // CORREÇÃO: Adicionada cláusula WHERE usuario_id para filtrar
     $sql = "SELECT * FROM fornecedores 
             WHERE usuario_id = :usuario_id AND status = 'ativo' 
             ORDER BY razao_social ASC";

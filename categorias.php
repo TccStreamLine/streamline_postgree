@@ -10,10 +10,9 @@ if (empty($_SESSION['id'])) {
     exit;
 }
 
-// Essa query é padrão ANSI SQL, funciona em ambos os bancos perfeitamente
-$sql = "SELECT * FROM categorias ORDER BY nome ASC";
+$sql = "SELECT * FROM categorias WHERE usuario_id = :usuario_id ORDER BY nome ASC";
 $stmt = $pdo->prepare($sql);
-$stmt->execute();
+$stmt->execute([':usuario_id' => $_SESSION['id']]);
 $categorias = $stmt->fetchAll(PDO::FETCH_ASSOC);
 
 $nome_empresa = $_SESSION['nome_empresa'] ?? 'Empresa';
@@ -78,7 +77,6 @@ $nome_empresa = $_SESSION['nome_empresa'] ?? 'Empresa';
         </div>
     </main>
     <script>
-        // ... (O JavaScript de busca já aponta para buscar_categorias.php que nós corrigimos antes)
         const deleteButtons = document.querySelectorAll('.btn-delete');
         deleteButtons.forEach(button => {
             button.addEventListener('click', function(event) {
@@ -126,7 +124,6 @@ $nome_empresa = $_SESSION['nome_empresa'] ?? 'Empresa';
         searchInput.addEventListener('keyup', async () => {
             const termo = searchInput.value;
             try {
-                // Importante: Já convertemos o buscar_categorias.php para usar ILIKE
                 const response = await fetch(`buscar_categorias.php?termo=${encodeURIComponent(termo)}`);
                 const categorias = await response.json();
                 renderTable(categorias);

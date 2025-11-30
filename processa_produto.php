@@ -8,7 +8,7 @@ if (empty($_SESSION['id'])) {
 }
 
 $acao = $_POST['acao'] ?? '';
-$usuario_id = $_SESSION['id']; // ID do usuário logado
+$usuario_id = $_SESSION['id']; 
 $produto_id = filter_var($_POST['produto_id'] ?? 0, FILTER_VALIDATE_INT);
 $codigo_barras = trim($_POST['codigo_barras'] ?? '');
 $nome = trim($_POST['nome'] ?? '');

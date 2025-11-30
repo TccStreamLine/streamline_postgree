@@ -2,13 +2,12 @@
 session_start();
 include_once('config.php');
 
-// Usando __DIR__ para garantir que os caminhos funcionem em qualquer servidor
-require_once __DIR__ . '/phpmailer/src/Exception.php';
-require_once __DIR__ . '/phpmailer/src/PHPMailer.php';
-require_once __DIR__ . '/phpmailer/src/SMTP.php';
-
-use PHPMailer\PHPMailer\PHPMailer;
-use PHPMailer\PHPMailer\Exception;
+// O envio de e-mail foi desativado para evitar timeout no servidor
+// require_once __DIR__ . '/phpmailer/src/Exception.php';
+// require_once __DIR__ . '/phpmailer/src/PHPMailer.php';
+// require_once __DIR__ . '/phpmailer/src/SMTP.php';
+// use PHPMailer\PHPMailer\PHPMailer;
+// use PHPMailer\PHPMailer\Exception;
 
 header('Content-Type: application/json');
 
@@ -19,82 +18,80 @@ if (empty($_SESSION['id']) || empty($_SESSION['carrinho'])) {
 
 $carrinho = $_SESSION['carrinho'];
 $usuario_id = $_SESSION['id'];
-$nome_empresa = $_SESSION['nome_empresa'] ?? 'Uma empresa parceira';
 
 try {
     $pdo->beginTransaction();
 
-    // Verifica o estoque (SELECT padrão, funciona em ambos)
-    $sql_check_produto = "SELECT nome, quantidade_estoque, quantidade_minima, fornecedor_id FROM produtos WHERE id = ?";
+    // Verifica estoque com segurança por usuário
+    $sql_check_produto = "SELECT nome, quantidade_estoque, quantidade_minima, fornecedor_id FROM produtos WHERE id = ? AND usuario_id = ?";
     $stmt_check_produto = $pdo->prepare($sql_check_produto);
 
+    // Array para armazenar produtos que precisariam de alerta (lógica mantida, mas envio desativado)
     $produtos_para_notificar = [];
 
     foreach ($carrinho as $item) {
         if ($item['tipo'] === 'produto') {
-            $stmt_check_produto->execute([$item['id']]);
+            $stmt_check_produto->execute([$item['id'], $usuario_id]);
             $produto = $stmt_check_produto->fetch(PDO::FETCH_ASSOC);
 
             if (!$produto) {
-                throw new Exception('Produto não encontrado no banco de dados: ' . htmlspecialchars($item['nome']));
+                throw new Exception('Produto não encontrado ou não pertence a esta empresa: ' . htmlspecialchars($item['nome']));
             }
 
             $estoque_antes = (int)$produto['quantidade_estoque'];
             $estoque_depois = $estoque_antes - (int)$item['quantidade'];
 
             if ($estoque_depois < 0) {
-                throw new Exception("Estoque insuficiente para o produto: " . htmlspecialchars($item['nome']));
+                throw new Exception("Estoque insuficiente para: " . htmlspecialchars($item['nome']));
             }
             
-            // Verifica se vai ficar abaixo do mínimo
+            // Validação de estoque mínimo (Opcional: Descomente se quiser bloquear a venda)
+            /*
             if ($estoque_depois < $produto['quantidade_minima']) {
-                $mensagem_erro = "Venda bloqueada para o produto: " . htmlspecialchars($item['nome']) . ". A venda deixaria o estoque abaixo do mínimo permitido (" . $produto['quantidade_minima'] . " unidades).";
-                throw new Exception($mensagem_erro);
+                throw new Exception("Venda bloqueada: Estoque ficaria abaixo do mínimo para " . htmlspecialchars($item['nome']));
             }
+            */
 
-            // Verifica se cruzou a linha do mínimo agora (para notificar)
+            // Lógica de detecção para alerta
             if ($estoque_antes > $produto['quantidade_minima'] && $estoque_depois <= $produto['quantidade_minima']) {
                  $produtos_para_notificar[] = [
                     'id' => $item['id'],
                     'nome' => $produto['nome'],
-                    'fornecedor_id' => $produto['fornecedor_id'],
-                    'estoque_atual' => $estoque_depois
+                    'fornecedor_id' => $produto['fornecedor_id']
                 ];
             }
         }
     }
 
-    // Calcula o total
     $valor_total_venda = 0;
     foreach ($carrinho as $item) {
         $valor_total_venda += $item['quantidade'] * $item['valor_unitario'];
     }
 
-    // --- MUDANÇA CRÍTICA PARA POSTGRESQL ---
-    // No MySQL: INSERT ...; $id = lastInsertId();
-    // No Postgres: INSERT ... RETURNING id; (Mais seguro e atômico)
-    $sql_venda = "INSERT INTO vendas (usuario_id, valor_total) VALUES (?, ?) RETURNING id";
+    // 1. INSERE A VENDA
+    $sql_venda = "INSERT INTO vendas (usuario_id, valor_total, status, data_venda) 
+                  VALUES (?, ?, 'finalizada', CURRENT_TIMESTAMP) 
+                  RETURNING id";
     $stmt_venda = $pdo->prepare($sql_venda);
     $stmt_venda->execute([$usuario_id, $valor_total_venda]);
     
-    // Pega o ID retornado diretamente pelo INSERT
     $venda_id = $stmt_venda->fetchColumn();
 
     if (!$venda_id) {
-        throw new Exception("Erro ao gerar ID da venda.");
+        throw new Exception("Erro ao gravar venda.");
     }
 
-    // Prepara os inserts dos itens (SQL Padrão)
+    // 2. PREPARA OS INSERTS DOS ITENS
     $sql_item_produto = "INSERT INTO venda_itens (venda_id, produto_id, quantidade, valor_unitario, valor_total) VALUES (?, ?, ?, ?, ?)";
     $stmt_item_produto = $pdo->prepare($sql_item_produto);
     
     $sql_item_servico = "INSERT INTO venda_servicos (venda_id, servico_id, valor) VALUES (?, ?, ?)";
     $stmt_item_servico = $pdo->prepare($sql_item_servico);
     
-    // Update de estoque (SQL Padrão)
     $sql_update_estoque = "UPDATE produtos SET quantidade_estoque = quantidade_estoque - ? WHERE id = ?";
     $stmt_update_estoque = $pdo->prepare($sql_update_estoque);
 
+    // 3. EXECUTA A GRAVAÇÃO
     foreach ($carrinho as $item) {
         if ($item['tipo'] === 'produto') {
             $valor_total_item = $item['quantidade'] * $item['valor_unitario'];
@@ -109,43 +106,13 @@ try {
     unset($_SESSION['carrinho']);
     $_SESSION['msg_sucesso_caixa'] = "Venda finalizada com sucesso!";
 
-    // --- ENVIO DE E-MAILS (Lógica PHP mantida) ---
+    // --- BLOCO DE E-MAIL (COMENTADO PARA NÃO TRAVAR O TCC) ---
+    /*
     if (!empty($produtos_para_notificar)) {
-        // Garante status 'ativo' na busca do fornecedor
-        $sql_fornecedor = "SELECT email, razao_social FROM fornecedores WHERE id = ? AND email IS NOT NULL AND status = 'ativo'";
-        $stmt_fornecedor = $pdo->prepare($sql_fornecedor);
-
-        foreach ($produtos_para_notificar as $produto_notificar) {
-            if ($produto_notificar['fornecedor_id']) {
-                $stmt_fornecedor->execute([$produto_notificar['fornecedor_id']]);
-                $fornecedor = $stmt_fornecedor->fetch(PDO::FETCH_ASSOC);
-
-                if ($fornecedor && !empty($fornecedor['email'])) {
-                    $mail = new PHPMailer(true);
-                    try {
-                        $mail->SMTPDebug = 0; 
-                        $mail->isSMTP();
-                        $mail->Host = 'smtp-relay.brevo.com';
-                        $mail->SMTPAuth = true;
-                        $mail->Username = '9691c1001@smtp-brevo.com';
-                        $mail->Password = 'g3BDXcCKG8zWtZRL';
-                        $mail->SMTPSecure = PHPMailer::ENCRYPTION_STARTTLS;
-                        $mail->Port = 587;
-                        $mail->CharSet = 'UTF-8';
-                        $mail->setFrom('tccstreamline@gmail.com', 'Streamline - Alerta de Estoque');
-                        $mail->addAddress($fornecedor['email'], $fornecedor['razao_social']);
-                        $mail->isHTML(true);
-                        $mail->Subject = 'Alerta de Estoque Baixo';
-                        $mail->Body = "Olá, " . htmlspecialchars($fornecedor['razao_social']) . "! O produto " . htmlspecialchars($produto_notificar['nome']) . " atingiu o estoque mínimo.";
-                        $mail->send();
-                    } catch (Exception $e) {
-                        // Log do erro de email, mas não trava a venda
-                        error_log("Erro ao enviar email: " . $mail->ErrorInfo);
-                    }
-                }
-            }
-        }
+        // ... (Código antigo de envio de e-mail via PHPMailer) ...
+        // Como o Railway bloqueia SMTP, isso causaria timeout de 30s e erro 500.
     }
+    */
 
     echo json_encode(['success' => true]);
 

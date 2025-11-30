@@ -7,9 +7,9 @@ if (empty($_SESSION['id'])) {
     exit;
 }
 
-$usuario_id = $_SESSION['id']; // ID do usuário logado
+$usuario_id = $_SESSION['id']; 
 $filtro = $_GET['filtro'] ?? '';
-$where_clause = "p.usuario_id = :usuario_id AND p.status = 'ativo'"; // Filtro inicial por usuário
+$where_clause = "p.usuario_id = :usuario_id AND p.status = 'ativo'"; 
 $params = [':usuario_id' => $usuario_id];
 
 $titulo_header = 'Estoque';
@@ -31,7 +31,7 @@ try {
             ORDER BY p.nome ASC";
             
     $stmt_produtos = $pdo->prepare($sql);
-    $stmt_produtos->execute($params); // Executa com o ID do usuário
+    $stmt_produtos->execute($params); 
     $produtos = $stmt_produtos->fetchAll(PDO::FETCH_ASSOC);
 } catch (PDOException $e) {
     $erro_busca = "Erro ao buscar dados: " . $e->getMessage();

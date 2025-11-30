@@ -67,13 +67,11 @@ try {
                     throw new Exception("Estoque insuficiente para: " . htmlspecialchars($produto['nome']));
                 }
                 
-                // Validação de estoque mínimo restaurada
                 if ($estoque_final < $produto['quantidade_minima']) {
                     throw new Exception("Venda bloqueada: Estoque ficaria abaixo do mínimo para " . htmlspecialchars($produto['nome']));
                 }
 
             } elseif ($item_tipo === 'servico') {
-                 // Validação de serviço restaurada
                  $stmt_check_servico->execute([$item_id, $usuario_id]);
                  if (!$stmt_check_servico->fetch()) {
                     throw new Exception("Serviço ID $item_id inválido ou não pertence a você.");
@@ -86,7 +84,6 @@ try {
         $data_venda = $_POST['data_venda'] ?? date('Y-m-d H:i:s');
         $descricao = trim($_POST['descricao'] ?? '');
 
-        // Correção aplicada: status minúsculo 'finalizada' e usuario_id
         $sql_venda = "INSERT INTO vendas (usuario_id, valor_total, descricao, data_venda, status) 
                       VALUES (?, ?, ?, ?, 'finalizada') RETURNING id";
         $stmt_venda = $pdo->prepare($sql_venda);
@@ -141,7 +138,6 @@ try {
         $data_venda = $_POST['data_venda'] ?? date('Y-m-d H:i:s');
         $descricao = trim($_POST['descricao'] ?? '');
 
-        // Correção aplicada: validação por usuario_id no UPDATE
         $sql = "UPDATE vendas SET data_venda = ?, descricao = ? WHERE id = ? AND usuario_id = ?";
         $stmt = $pdo->prepare($sql);
         if (!$stmt->execute([$data_venda, $descricao, $venda_id, $usuario_id])) {

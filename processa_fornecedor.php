@@ -1,5 +1,5 @@
 <?php
-ini_set('max_execution_time', '120');
+ini_set('max_execution_time', '120'); 
 session_start();
 include_once('config.php');
 
