@@ -1,5 +1,5 @@
 <?php
-ini_set('max_execution_time', '120'); 
+ini_set('max_execution_time', '120'); // Aumentado o tempo de execução para 120 segundos
 session_start();
 include_once('config.php');
 
@@ -71,15 +71,16 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             $token_stmt = $pdo->prepare("UPDATE fornecedores SET reset_token = ?, reset_token_expire = ? WHERE id = ?");
             $token_stmt->execute([$token, $expira, $fornecedor_id]);
 
+            // Configuração e envio do e-mail - CORREÇÃO DE PORTA/PROTOCOLO
             $mail = new PHPMailer(true);
-            $mail->Timeout = 60; // Timeout SMTP aumentado para 60 segundos
+            $mail->Timeout = 60; 
             $mail->isSMTP();
             $mail->Host = 'smtp-relay.brevo.com';
             $mail->SMTPAuth = true;
             $mail->Username = '9691c1001@smtp-brevo.com'; 
             $mail->Password = 'g3BDXcCKG8zWtZRL'; 
-            $mail->SMTPSecure = PHPMailer::ENCRYPTION_STARTTLS;
-            $mail->Port = 587;
+            $mail->SMTPSecure = PHPMailer::ENCRYPTION_SMTPS; // PROTOCOLO SMTPS (SSL)
+            $mail->Port = 465; // PORTA SSL
             $mail->CharSet = 'UTF-8';
             
             $mail->setFrom('tccstreamline@gmail.com', 'Streamline - Convite');
@@ -87,7 +88,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             $mail->isHTML(true);
             $mail->Subject = 'Convite para o Portal de Fornecedores';
             
-            // ATUALIZE AQUI: Use o domínio público do Railway
+            // ATUALIZE O DOMÍNIO AQUI
             $link = "https://streamlinepostgree-production.up.railway.app/definir_senha_fornecedor.php?token=" . $token;
             
             $mail->Body = "
@@ -110,7 +111,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             if ($pdo->inTransaction()) {
                 $pdo->rollBack();
             }
-            // Retorna o erro exato do e-mail para depuração
             $_SESSION['msg_erro'] = "Erro ao cadastrar: Falha no envio do e-mail. Tente mais tarde ou contate o suporte. Detalhe: " . $mail->ErrorInfo;
         }
 
