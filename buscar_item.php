@@ -11,7 +11,7 @@ if (empty($_SESSION['id'])) {
 
 $termo_busca = $_GET['termo'] ?? '';
 $tipo = $_GET['tipo'] ?? 'produto';
-$usuario_id = $_SESSION['id'];
+$usuario_id = $_SESSION['id']; // ID da empresa logada
 
 if (empty($termo_busca)) {
     echo json_encode(['error' => 'Termo de busca não fornecido.']);
@@ -20,16 +20,19 @@ if (empty($termo_busca)) {
 
 try {
     if ($tipo === 'produto') {
+        // --- PRODUTO (CORRIGIDO) ---
+        // Adicionado AND usuario_id = :usuario_id
         $stmt = $pdo->prepare("
-            SELECT id, nome, valor_venda 
+            SELECT id, nome, valor_venda, quantidade_estoque 
             FROM produtos 
             WHERE (codigo_barras = :termo OR nome ILIKE :termo_like) 
             AND status = 'ativo'
-            AND usuario_id = :usuario_id 
+            AND usuario_id = :usuario_id
         ");
         $stmt->bindParam(':usuario_id', $usuario_id);
         
-    } else { 
+    } else { // tipo === 'servico'
+        // --- SERVIÇO (Já estava com usuario_id, mantido) ---
         $stmt = $pdo->prepare("
             SELECT id, nome_servico as nome, valor_venda 
             FROM servicos_prestados 

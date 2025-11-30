@@ -6,40 +6,41 @@ header('Content-Type: application/json');
 
 // Segurança: Se não estiver logado, não mostra nada
 if (empty($_SESSION['id'])) {
-    echo json_encode([]);
+    http_response_code(401);
+    echo json_encode(['erro' => 'Usuário não autenticado.']);
     exit;
 }
 
 $usuario_id = $_SESSION['id']; // ID da empresa logada
-$termo = $_GET['termo'] ?? '';
-$filtro = $_GET['filtro'] ?? '';
+$termo_busca = $_GET['termo'] ?? '';
+$filtro = $_GET['filtro'] ?? ''; 
+
+// --- CORREÇÃO CRÍTICA: Adicionado p.usuario_id = :usuario_id ---
+$where_clause = "p.usuario_id = :usuario_id AND p.status = 'ativo' AND (p.nome ILIKE :termo OR p.codigo_barras ILIKE :termo)";
+$params = [
+    ':usuario_id' => $usuario_id,
+    ':termo' => '%' . $termo_busca . '%'
+];
+
+if ($filtro === 'estoque_baixo') {
+    $where_clause .= " AND p.quantidade_estoque <= p.quantidade_minima";
+}
 
 try {
-    // CORREÇÃO CRÍTICA: Adicionado "AND usuario_id = :usuario_id"
-    // Isso garante que você só veja os SEUS produtos
-    $sql = "SELECT id, nome, codigo_barras, quantidade_estoque, valor_venda 
-            FROM produtos 
-            WHERE (nome ILIKE :termo OR codigo_barras ILIKE :termo)
-            AND usuario_id = :usuario_id 
-            AND status = 'ativo'";
+    $sql = "SELECT p.*, c.nome as categoria_nome 
+            FROM produtos p 
+            LEFT JOIN categorias c ON p.categoria_id = c.id 
+            WHERE $where_clause
+            ORDER BY p.nome ASC LIMIT 20";
 
-    // Filtro opcional de estoque baixo (se usado em algum lugar)
-    if ($filtro === 'estoque_baixo') {
-        $sql .= " AND quantidade_estoque <= quantidade_minima";
-    }
-    
-    $sql .= " ORDER BY nome ASC LIMIT 20";
-            
-    $stmt = $pdo->prepare($sql);
-    $stmt->execute([
-        ':termo' => "%$termo%",
-        ':usuario_id' => $usuario_id
-    ]);
-    
-    echo json_encode($stmt->fetchAll(PDO::FETCH_ASSOC));
+    $stmt_produtos = $pdo->prepare($sql);
+    $stmt_produtos->execute($params);
+    $produtos = $stmt_produtos->fetchAll(PDO::FETCH_ASSOC);
+
+    echo json_encode($produtos);
 
 } catch (PDOException $e) {
     http_response_code(500);
-    echo json_encode(['error' => 'Erro ao buscar produtos: ' . $e->getMessage()]);
+    echo json_encode(['erro' => 'Erro ao buscar produtos: ' . $e->getMessage()]);
 }
 ?>
