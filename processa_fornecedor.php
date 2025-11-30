@@ -71,7 +71,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             $token_stmt = $pdo->prepare("UPDATE fornecedores SET reset_token = ?, reset_token_expire = ? WHERE id = ?");
             $token_stmt->execute([$token, $expira, $fornecedor_id]);
 
-            // Configuração e envio do e-mail - MUDANÇA PARA PORTA 2525
+            // Configuração e envio do e-mail - MUDANÇA PARA PORTA 25 (TLS)
             $mail = new PHPMailer(true);
             $mail->Timeout = 60; 
             $mail->isSMTP();
@@ -80,7 +80,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             $mail->Username = '9691c1001@smtp-brevo.com'; 
             $mail->Password = 'g3BDXcCKG8zWtZRL'; 
             $mail->SMTPSecure = PHPMailer::ENCRYPTION_STARTTLS; // TLS
-            $mail->Port = 2525; // Porta Alternativa Brevo
+            $mail->Port = 25; // Porta 25
             $mail->CharSet = 'UTF-8';
             
             $mail->setFrom('tccstreamline@gmail.com', 'Streamline - Convite');
