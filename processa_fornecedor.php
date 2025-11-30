@@ -1,5 +1,5 @@
 <?php
-ini_set('max_execution_time', '120'); // Aumentado o tempo de execução para 120 segundos
+ini_set('max_execution_time', '120'); 
 session_start();
 include_once('config.php');
 
@@ -71,7 +71,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             $token_stmt = $pdo->prepare("UPDATE fornecedores SET reset_token = ?, reset_token_expire = ? WHERE id = ?");
             $token_stmt->execute([$token, $expira, $fornecedor_id]);
 
-            // Configuração e envio do e-mail - CORREÇÃO DE PORTA/PROTOCOLO
+            // Configuração e envio do e-mail - MUDANÇA PARA PORTA 2525
             $mail = new PHPMailer(true);
             $mail->Timeout = 60; 
             $mail->isSMTP();
@@ -79,8 +79,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             $mail->SMTPAuth = true;
             $mail->Username = '9691c1001@smtp-brevo.com'; 
             $mail->Password = 'g3BDXcCKG8zWtZRL'; 
-            $mail->SMTPSecure = PHPMailer::ENCRYPTION_SMTPS; // PROTOCOLO SMTPS (SSL)
-            $mail->Port = 465; // PORTA SSL
+            $mail->SMTPSecure = PHPMailer::ENCRYPTION_STARTTLS; // TLS
+            $mail->Port = 2525; // Porta Alternativa Brevo
             $mail->CharSet = 'UTF-8';
             
             $mail->setFrom('tccstreamline@gmail.com', 'Streamline - Convite');
@@ -88,7 +88,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             $mail->isHTML(true);
             $mail->Subject = 'Convite para o Portal de Fornecedores';
             
-            // ATUALIZE O DOMÍNIO AQUI
             $link = "https://streamlinepostgree-production.up.railway.app/definir_senha_fornecedor.php?token=" . $token;
             
             $mail->Body = "
