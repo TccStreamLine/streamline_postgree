@@ -30,7 +30,6 @@ if (isset($_SESSION['role']) && $_SESSION['role'] === 'funcionario') {
 $eventos_hoje = [];
 if ($user_role === 'funcionario') {
     $hoje = date('Y-m-d');
-    // MUDANÇA: DATE(inicio) -> inicio::DATE para compatibilidade com PostgreSQL
     $stmt = $pdo->prepare(
         "SELECT titulo, horario FROM eventos WHERE usuario_id = ? AND inicio::DATE = ? ORDER BY horario ASC"
     );
@@ -40,14 +39,14 @@ if ($user_role === 'funcionario') {
 
 $produtos_estoque_baixo = [];
 if ($user_role === 'funcionario' || $user_role === 'ceo') {
-    // Query de estoque padrão, funciona no Postgres
+    // CORREÇÃO: Adicionado filtro WHERE usuario_id = ?
     $stmt_estoque = $pdo->prepare(
         "SELECT nome, quantidade_estoque, quantidade_minima 
          FROM produtos 
-         WHERE quantidade_estoque <= quantidade_minima AND status = 'ativo' 
+         WHERE usuario_id = ? AND quantidade_estoque <= quantidade_minima AND status = 'ativo' 
          ORDER BY nome ASC LIMIT 5"
     );
-    $stmt_estoque->execute();
+    $stmt_estoque->execute([$_SESSION['id']]);
     $produtos_estoque_baixo = $stmt_estoque->fetchAll(PDO::FETCH_ASSOC);
 }
 ?>

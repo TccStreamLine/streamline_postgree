@@ -2,8 +2,16 @@
 session_start();
 include_once('config.php');
 
+if (empty($_SESSION['id'])) {
+    header('Location: login.php');
+    exit;
+}
+
+$usuario_id = $_SESSION['id']; // ID do usuário logado
 $filtro = $_GET['filtro'] ?? '';
-$where_clause = "p.status = 'ativo'";
+$where_clause = "p.usuario_id = :usuario_id AND p.status = 'ativo'"; // Filtro inicial por usuário
+$params = [':usuario_id' => $usuario_id];
+
 $titulo_header = 'Estoque';
 
 if ($filtro === 'estoque_baixo') {
@@ -11,17 +19,11 @@ if ($filtro === 'estoque_baixo') {
     $titulo_header = 'Estoque Baixo';
 }
 
-if (empty($_SESSION['id'])) {
-    header('Location: login.php');
-    exit;
-}
-
 $pagina_ativa = 'estoque';
 $produtos = [];
 $erro_busca = null;
 
 try {
-    // Query compatível com PostgreSQL e MySQL
     $sql = "SELECT p.*, c.nome as categoria_nome 
             FROM produtos p 
             LEFT JOIN categorias c ON p.categoria_id = c.id 
@@ -29,7 +31,7 @@ try {
             ORDER BY p.nome ASC";
             
     $stmt_produtos = $pdo->prepare($sql);
-    $stmt_produtos->execute();
+    $stmt_produtos->execute($params); // Executa com o ID do usuário
     $produtos = $stmt_produtos->fetchAll(PDO::FETCH_ASSOC);
 } catch (PDOException $e) {
     $erro_busca = "Erro ao buscar dados: " . $e->getMessage();
@@ -175,7 +177,6 @@ $nome_empresa = $_SESSION['nome_empresa'] ?? 'Empresa';
             const termo = searchInput.value;
             const filtroAtual = '<?= $filtro ?>';
             try {
-                // A URL buscar_produtos_estoque.php já foi ajustada por nós anteriormente para suportar ILIKE
                 const response = await fetch(`buscar_produtos_estoque.php?termo=${encodeURIComponent(termo)}&filtro=${filtroAtual}`);
                 const produtos = await response.json();
                 renderTable(produtos);

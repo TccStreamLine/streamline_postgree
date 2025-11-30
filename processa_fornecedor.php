@@ -1,8 +1,8 @@
 <?php
+ini_set('max_execution_time', '120'); 
 session_start();
 include_once('config.php');
 
-// Garante caminhos absolutos para evitar erros de inclusão
 require_once __DIR__ . '/phpmailer/src/Exception.php';
 require_once __DIR__ . '/phpmailer/src/SMTP.php';
 require_once __DIR__ . '/phpmailer/src/PHPMailer.php';
@@ -41,7 +41,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         try {
             $pdo->beginTransaction();
 
-            // Verifica duplicidade (Query padrão)
             $check_sql = "SELECT id FROM fornecedores WHERE (cnpj = :cnpj OR email = :email) AND status = 'ativo'";
             $check_stmt = $pdo->prepare($check_sql);
             $check_stmt->execute([':cnpj' => $cnpj, ':email' => $email]);
@@ -52,8 +51,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 exit;
             }
 
-            // --- MUDANÇA PARA POSTGRESQL: INSERT COM RETURNING ID ---
-            // Em vez de usar lastInsertId(), usamos RETURNING id para garantir o retorno correto
             $sql = "INSERT INTO fornecedores (razao_social, cnpj, email, telefone, status) 
                     VALUES (:razao_social, :cnpj, :email, :telefone, 'ativo') 
                     RETURNING id";
@@ -66,19 +63,16 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 ':telefone' => $telefone
             ]);
             
-            // Pega o ID retornado diretamente pelo INSERT
             $fornecedor_id = $stmt->fetchColumn();
 
-            // Gera o token para definir a senha
             $token = bin2hex(random_bytes(50));
-            // Timestamp padrão do Postgres aceita esse formato
             $expira = date("Y-m-d H:i:s", time() + 86400); 
 
             $token_stmt = $pdo->prepare("UPDATE fornecedores SET reset_token = ?, reset_token_expire = ? WHERE id = ?");
             $token_stmt->execute([$token, $expira, $fornecedor_id]);
 
-            // Configuração e envio do e-mail
             $mail = new PHPMailer(true);
+            $mail->Timeout = 60; // Timeout SMTP aumentado para 60 segundos
             $mail->isSMTP();
             $mail->Host = 'smtp-relay.brevo.com';
             $mail->SMTPAuth = true;
@@ -93,8 +87,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             $mail->isHTML(true);
             $mail->Subject = 'Convite para o Portal de Fornecedores';
             
-            // Link para o fornecedor definir a senha
-            $link = "http://localhost/streamline/definir_senha_fornecedor.php?token=" . $token;
+            // ATUALIZE AQUI: Use o domínio público do Railway
+            $link = "https://streamlinepostgree-production.up.railway.app/definir_senha_fornecedor.php?token=" . $token;
             
             $mail->Body = "
                 <h2>Olá, " . htmlspecialchars($razao_social) . "!</h2>
@@ -116,7 +110,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             if ($pdo->inTransaction()) {
                 $pdo->rollBack();
             }
-            $_SESSION['msg_erro'] = "Erro ao cadastrar: " . $e->getMessage();
+            // Retorna o erro exato do e-mail para depuração
+            $_SESSION['msg_erro'] = "Erro ao cadastrar: Falha no envio do e-mail. Tente mais tarde ou contate o suporte. Detalhe: " . $mail->ErrorInfo;
         }
 
     } elseif ($acao === 'editar') {
@@ -125,7 +120,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             $_SESSION['msg_erro'] = "ID do fornecedor inválido.";
         } else {
              try {
-                // Validação de duplicidade na edição
                 $check_sql = "SELECT id FROM fornecedores WHERE (cnpj = :cnpj OR email = :email) AND id != :id AND status = 'ativo'";
                 $check_stmt = $pdo->prepare($check_sql);
                 $check_stmt->execute([':cnpj' => $cnpj, ':email' => $email, ':id' => $id]);
@@ -135,7 +129,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                     header('Location: fornecedor_formulario.php?id=' . $id); exit;
                 }
                 
-                // UPDATE padrão compatível
                 $sql = "UPDATE fornecedores SET razao_social = :razao_social, cnpj = :cnpj, email = :email, telefone = :telefone WHERE id = :id";
                 $stmt = $pdo->prepare($sql);
                 $stmt->execute([':razao_social' => $razao_social, ':cnpj' => $cnpj, ':email' => $email, ':telefone' => $telefone, ':id' => $id]);
