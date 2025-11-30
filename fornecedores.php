@@ -37,10 +37,21 @@ $nome_empresa = $_SESSION['nome_empresa'] ?? 'Empresa';
         <?php include 'header.php'; ?>
         <div class="message-container">
             <?php if (isset($_SESSION['msg_sucesso'])): ?>
-                <div class="alert alert-success"><?= $_SESSION['msg_sucesso']; unset($_SESSION['msg_sucesso']); ?></div>
+                <div class="alert alert-success"><?= $_SESSION['msg_sucesso'];
+                                                    unset($_SESSION['msg_sucesso']); ?></div>
             <?php endif; ?>
+            <?php if (isset($_SESSION['fornecedor_link_manual'])): ?>
+                <div class="alert alert-warning" style="word-break: break-all; margin-top: 20px;">
+                    <h3> ATENÇÃO: Link de Ativação Manual </h3>
+                    <a href="<?= htmlspecialchars($_SESSION['fornecedor_link_manual']) ?>" target="_blank" style="color: #6D28D9; font-weight: bold; text-decoration: underline;">
+                        <?= htmlspecialchars($_SESSION['fornecedor_link_manual']); ?>
+                    </a>
+                </div>
+            <?php unset($_SESSION['fornecedor_link_manual']);
+            endif; ?>
             <?php if (isset($_SESSION['msg_erro'])): ?>
-                <div class="alert alert-danger"><?= $_SESSION['msg_erro']; unset($_SESSION['msg_erro']); ?></div>
+                <div class="alert alert-danger"><?= $_SESSION['msg_erro'];
+                                                unset($_SESSION['msg_erro']); ?></div>
             <?php endif; ?>
         </div>
         <div class="actions-container">
@@ -85,10 +96,10 @@ $nome_empresa = $_SESSION['nome_empresa'] ?? 'Empresa';
                                         <i class="fas fa-tasks"></i>
                                     </a>
                                     <a href="fornecedor_formulario.php?id=<?= $fornecedor['id'] ?>" class="btn-action btn-edit" title="Editar Fornecedor">
-                                        <i class="fas fa-pencil-alt"></i> 
+                                        <i class="fas fa-pencil-alt"></i>
                                     </a>
                                     <a href="excluir_fornecedor.php?id=<?= $fornecedor['id'] ?>" class="btn-action btn-delete" title="Excluir Fornecedor">
-                                        <i class="fas fa-trash-alt"></i> 
+                                        <i class="fas fa-trash-alt"></i>
                                     </a>
                                 </td>
                             </tr>
@@ -164,4 +175,5 @@ $nome_empresa = $_SESSION['nome_empresa'] ?? 'Empresa';
     <script src="notificacoes.js"></script>
     <script src="notificacoes_fornecedor.js"></script>
 </body>
+
 </html>

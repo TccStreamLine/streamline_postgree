@@ -33,7 +33,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
     if ($acao === 'cadastrar') {
         if (empty($email)) {
-            $_SESSION['msg_erro'] = "O e-mail é obrigatório para enviar o convite de definição de senha.";
+            $_SESSION['msg_erro'] = "O e-mail é obrigatório para o convite.";
             header('Location: fornecedor_formulario.php');
             exit;
         }
@@ -70,47 +70,32 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
             $token_stmt = $pdo->prepare("UPDATE fornecedores SET reset_token = ?, reset_token_expire = ? WHERE id = ?");
             $token_stmt->execute([$token, $expira, $fornecedor_id]);
+            
+            // Link de ativação (usaremos para exibição manual)
+            $link_ativacao = "https://streamlinepostgree-production.up.railway.app/definir_senha_fornecedor.php?token=" . $token;
 
-            // Configuração e envio do e-mail - MUDANÇA PARA PORTA 25 (TLS)
+            // =========================================================
+            // === BLOCO DE E-MAIL COMENTADO (Para evitar o timeout) ===
+            /*
             $mail = new PHPMailer(true);
             $mail->Timeout = 60; 
-            $mail->isSMTP();
-            $mail->Host = 'smtp-relay.brevo.com';
-            $mail->SMTPAuth = true;
-            $mail->Username = '9691c1001@smtp-brevo.com'; 
-            $mail->Password = 'g3BDXcCKG8zWtZRL'; 
-            $mail->SMTPSecure = PHPMailer::ENCRYPTION_STARTTLS; // TLS
-            $mail->Port = 25; // Porta 25
-            $mail->CharSet = 'UTF-8';
-            
-            $mail->setFrom('tccstreamline@gmail.com', 'Streamline - Convite');
-            $mail->addAddress($email, $razao_social);
-            $mail->isHTML(true);
-            $mail->Subject = 'Convite para o Portal de Fornecedores';
-            
-            $link = "https://streamlinepostgree-production.up.railway.app/definir_senha_fornecedor.php?token=" . $token;
-            
-            $mail->Body = "
-                <h2>Olá, " . htmlspecialchars($razao_social) . "!</h2>
-                <p>A empresa <strong>" . htmlspecialchars($nome_empresa_ceo) . "</strong> convidou você para o portal de fornecedores do sistema Streamline.</p>
-                <p>Para começar, clique no link abaixo para definir sua senha de acesso:</p>
-                <p style='margin: 25px 0;'>
-                    <a href='$link' style='background-color: #6D28D9; color: white; padding: 14px 22px; text-decoration: none; border-radius: 8px; font-weight: bold;'>
-                        Definir Minha Senha
-                    </a>
-                </p>
-                <p>Este link é válido por 24 horas.</p>
-            ";
+            // ... (restante da configuração e envio do e-mail) ...
             $mail->send();
+            */
+            // =========================================================
 
             $pdo->commit();
-            $_SESSION['msg_sucesso'] = "Fornecedor cadastrado e e-mail de convite enviado com sucesso!";
+            
+            // NOVO: Salva o link na sessão para ser exibido na próxima página
+            $_SESSION['fornecedor_link_manual'] = $link_ativacao; 
+
+            $_SESSION['msg_sucesso'] = "Fornecedor cadastrado com sucesso! Use o link exibido abaixo para a criação de senha.";
 
         } catch (Exception $e) {
             if ($pdo->inTransaction()) {
                 $pdo->rollBack();
             }
-            $_SESSION['msg_erro'] = "Erro ao cadastrar: Falha no envio do e-mail. Tente mais tarde ou contate o suporte. Detalhe: " . $mail->ErrorInfo;
+            $_SESSION['msg_erro'] = "Erro ao cadastrar: " . $e->getMessage();
         }
 
     } elseif ($acao === 'editar') {
