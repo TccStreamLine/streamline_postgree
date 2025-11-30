@@ -7,35 +7,28 @@ if (empty($_SESSION['id'])) {
     exit;
 }
 
-$usuario_id = $_SESSION['id']; // ID do usuário logado
+$usuario_id = $_SESSION['id'];
 $produto = [];
 $modo_edicao = false;
 $titulo_pagina = "Cadastrar Produto";
 $titulo_header = 'Estoque > Cadastrar Produto';
 
-// --- BUSCAR DADOS PARA OS DROPDOWNS (COM FILTRO DE USUÁRIO) ---
-
-// 1. Buscar Categorias (Filtradas pelo usuário)
+// Buscar Categorias
 $stmt_cat = $pdo->prepare("SELECT id, nome FROM categorias WHERE usuario_id = ? ORDER BY nome ASC");
 $stmt_cat->execute([$usuario_id]);
 $categorias = $stmt_cat->fetchAll(PDO::FETCH_ASSOC);
 
-// 2. Buscar Fornecedores (Filtrados pelo usuário e ativos)
-// Nota: Se você não tiver a coluna usuario_id em fornecedores, vai dar erro. 
-// Certifique-se de ter rodado o SQL da etapa anterior.
+// Buscar Fornecedores
 $stmt_forn = $pdo->prepare("SELECT id, razao_social FROM fornecedores WHERE usuario_id = ? AND status = 'ativo' ORDER BY razao_social ASC");
 $stmt_forn->execute([$usuario_id]);
 $fornecedores = $stmt_forn->fetchAll(PDO::FETCH_ASSOC);
 
-
-// --- LÓGICA DE EDIÇÃO ---
 if (isset($_GET['id']) && !empty($_GET['id'])) {
     $modo_edicao = true;
     $id_produto = filter_var($_GET['id'], FILTER_VALIDATE_INT);
     $titulo_pagina = "Editar Produto";
     $titulo_header = 'Estoque > Editar Produto';
 
-    // 3. Buscar Produto (Segurança: Garante que o produto pertence ao usuário)
     $stmt = $pdo->prepare("SELECT * FROM produtos WHERE id = ? AND usuario_id = ?");
     $stmt->execute([$id_produto, $usuario_id]);
     $produto = $stmt->fetch(PDO::FETCH_ASSOC);
@@ -54,7 +47,7 @@ $nome_empresa = $_SESSION['nome_empresa'] ?? 'Empresa';
 
 <head>
     <meta charset="UTF-8">
-    <title><?= $titulo_pagina ?> - Streamline</title>
+    <title><?= htmlspecialchars($titulo_pagina) ?> - Streamline</title>
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <link rel="stylesheet" href="css/sistema.css">
@@ -83,7 +76,7 @@ $nome_empresa = $_SESSION['nome_empresa'] ?? 'Empresa';
 
             <form action="processa_produto.php" method="POST">
                 <input type="hidden" name="acao" value="<?= $modo_edicao ? 'editar' : 'cadastrar' ?>">
-                <input type="hidden" name="produto_id" value="<?= $produto['id'] ?? '' ?>">
+                <input type="hidden" name="produto_id" value="<?= htmlspecialchars($produto['id'] ?? '') ?>">
 
                 <div class="form-grid">
                     <div class="input-group">
@@ -101,7 +94,8 @@ $nome_empresa = $_SESSION['nome_empresa'] ?? 'Empresa';
                         <select name="categoria_id" class="select-figma">
                             <option value="">Selecione uma categoria</option>
                             <?php foreach ($categorias as $cat): ?>
-                                <option value="<?= $cat['id'] ?>" <?= (isset($produto['categoria_id']) && $produto['categoria_id'] == $cat['id']) ? 'selected' : '' ?>>
+                                <?php $selected = (isset($produto['categoria_id']) && $produto['categoria_id'] == $cat['id']) ? 'selected' : ''; ?>
+                                <option value="<?= $cat['id'] ?>" <?= $selected ?>>
                                     <?= htmlspecialchars($cat['nome']) ?>
                                 </option>
                             <?php endforeach; ?>
@@ -113,7 +107,8 @@ $nome_empresa = $_SESSION['nome_empresa'] ?? 'Empresa';
                         <select name="fornecedor_id" class="select-figma">
                             <option value="">Selecione um fornecedor</option>
                             <?php foreach ($fornecedores as $forn): ?>
-                                <option value="<?= $forn['id'] ?>" <?= (isset($produto['fornecedor_id']) && $produto['fornecedor_id'] == $forn['id']) ? 'selected' : '' ?>>
+                                <?php $selected = (isset($produto['fornecedor_id']) && $produto['fornecedor_id'] == $forn['id']) ? 'selected' : ''; ?>
+                                <option value="<?= $forn['id'] ?>" <?= $selected ?>>
                                     <?= htmlspecialchars($forn['razao_social']) ?>
                                 </option>
                             <?php endforeach; ?>
@@ -158,7 +153,6 @@ $nome_empresa = $_SESSION['nome_empresa'] ?? 'Empresa';
     <script src="notificacoes.js"></script>
     <script src="notificacoes_fornecedor.js"></script>
     <script>
-        // Formatação simples de moeda no frontend
         const moneyInputs = document.querySelectorAll('.money');
         moneyInputs.forEach(input => {
             input.addEventListener('input', function(e) {
