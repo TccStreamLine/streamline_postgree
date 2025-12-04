@@ -1,7 +1,4 @@
-/* --- ESTRUTURA PRINCIPAL --- */
 body {
-    font-family: "Segoe UI", -apple-system, BlinkMacSystemFont, Roboto, Helvetica, Arial, sans-serif;
-
     color: #333;
     margin: 0;
     display: flex;
@@ -16,7 +13,7 @@ body {
     position: relative;
 }
 
-/* --- CONTAINER PRINCIPAL DA AGENDA --- */
+
 .agenda-container {
     background: #ffffff;
     border-radius: 16px;
@@ -27,7 +24,7 @@ body {
     box-sizing: border-box;
 }
 
-/* --- CABEÇALHO PRINCIPAL (MODIFICADO) --- */
+
 .main-header {
     display: flex;
     justify-content: space-between;
@@ -57,7 +54,7 @@ body {
     justify-content: flex-end;
 }
 
-/* --- BOTÕES --- */
+
 .btn {
     border: 2px solid #e0e0e0;
     background-color: #fff;
@@ -72,13 +69,13 @@ body {
 
 .btn:hover {
     background-color: #f8f9fa;
-    border-color: #4a148c;
+    border-color: var(--accent-color);
     transform: translateY(-2px);
     box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15);
 }
 
 .btn-primary {
-    background: linear-gradient(to right, #6a1b9a, #4a148c);
+    background-color: var(--accent-color);
     color: white;
     border: none;
     padding: 12px 20px;
@@ -91,9 +88,30 @@ body {
 }
 
 .btn-primary:hover {
-    transform: scale(1.05);
-    box-shadow: 0 6px 15px rgba(74, 20, 140, 0.5);
-    background: linear-gradient(to right, #7b1fa2, #5e35b1);
+    transform: translateY(-2px);
+    box-shadow: 0 6px 18px rgba(0, 0, 0, 0.12);
+    background-color: var(--accent-color-dark);
+}
+
+
+.main-header .header-right .btn-primary {
+    background-color: var(--accent-color);
+    color: white;
+    padding: 0.75rem 1.5rem;
+    border-radius: 8px;
+    text-decoration: none;
+    font-weight: 600;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    transition: background-color 200ms ease, transform 150ms ease, box-shadow 150ms ease;
+    transform: none !important;
+}
+
+.main-header .header-right .btn-primary:hover {
+    transform: none !important;
+    box-shadow: none !important;
+    background-color: var(--accent-color-dark) !important;
 }
 
 .btn-icon {
@@ -101,7 +119,6 @@ body {
     line-height: 1;
 }
 
-/* --- ESTILO DO CARROSSEL DE MÊS --- */
 .navigation-buttons {
     flex: 0 1 auto;
     display: flex;
@@ -127,7 +144,7 @@ body {
 .navigation-buttons .btn-icon {
     background-color: #fff;
     border: none;
-    color: #7732b8;
+    color: var(--accent-color);
     border-radius: 50%;
     width: 32px;
     height: 32px;
@@ -148,7 +165,6 @@ body {
 }
 
 
-/* --- CONTAINER DO CALENDÁRIO E EVENTOS --- */
 #calendar-container {
     background-color: transparent;
     padding: 0;
@@ -157,7 +173,6 @@ body {
     box-shadow: none;
 }
 
-/* --- GRID DO CALENDÁRIO --- */
 .calendario-grid {
     display: grid;
     grid-template-columns: repeat(7, 1fr);
@@ -289,7 +304,7 @@ body {
     border-left-color: #6c757d;
 }
 
-/* --- LISTA DE EVENTOS DO DIA (NOVO ESTILO) --- */
+
 #eventos-dia-container {
     margin-top: 30px;
     border-top: 1px solid #E1E1E1;
@@ -382,6 +397,150 @@ body {
     color: #6264A7;
 }
 
+/* Regras herdadas de estoque para manter consistência com o header (notificações / perfil) */
+.main-content .actions-container {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 2rem;
+}
+
+.main-content .search-bar {
+    position: relative;
+    width: 300px;
+}
+
+.main-content .search-bar input {
+    width: 300px;
+    padding: 16px 12px 16px 40px;
+    border-radius: 10px;
+    border: 1px solid transparent;
+    background: #F3F4F6;
+    font-size: 1rem;
+    color: var(--text-color);
+    outline: none;
+    transition: all 0.2s ease;
+    font-family: 'Inter', sans-serif;
+}
+
+.main-content .search-bar input:focus {
+    background: #fff;
+    border-color: #6D28D9;
+    box-shadow: 0 0 0 3px rgba(109, 40, 217, 0.2);
+}
+
+.main-content .search-bar i {
+    position: absolute;
+    left: 1rem;
+    top: 50%;
+    transform: translateY(-50%);
+    color: var(--text-light);
+}
+
+.main-content .btn-primary {
+    background-color: var(--accent-color);
+    color: white;
+    padding: 0.75rem 1.5rem;
+    border-radius: 8px;
+    text-decoration: none;
+    font-weight: 600;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    transition: background-color 200ms ease, transform 150ms ease, box-shadow 150ms ease;
+}
+
+.main-content .btn-primary:hover {
+    background-color: var(--accent-color-dark);
+    transform: scale(1.03);
+    box-shadow: 0 6px 18px rgba(0, 0, 0, 0.12);
+}
+
+.main-content .table-container {
+    background-color: var(--sidebar-bg);
+    border-radius: 12px;
+    padding: 2rem;
+    box-shadow: var(--card-shadow);
+}
+
+.actions-buttons {
+    display: flex;
+    gap: 1rem;
+}
+
+.btn-secondary {
+    background-color: #F3F4F6;
+    color: var(--text-color);
+    padding: 0.75rem 1.5rem;
+    border-radius: 8px;
+    text-decoration: none;
+    font-weight: 600;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    border: 1px solid var(--border-color);
+    transition: background-color 0.2s ease;
+}
+
+.btn-secondary:hover {
+    background-color: #E5E7EB;
+}
+
+
+.main-header .header-right {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+}
+
+.main-header .notification-icon {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 40px;
+    height: 40px;
+    background: transparent;
+    border-radius: 8px;
+    font-size: 1.05rem;
+    color: #555;
+    position: relative;
+}
+
+.main-header .notification-icon i {
+    line-height: 1;
+}
+
+.main-header .notification-icon:hover {
+    background: #f6f6fb;
+}
+
+.main-header .notification-icon .badge {
+    top: 6px !important;
+    right: 6px !important;
+    width: 18px;
+    height: 18px;
+    font-size: 10px;
+}
+
+.main-header .user-profile {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.main-header .avatar {
+    width: 36px;
+    height: 36px;
+    border-radius: 50%;
+    overflow: hidden;
+}
+
+.main-header .header-profile-pic {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
 .evento-acoes .btn-acao-excluir:hover {
     color: #D83B01;
 }
@@ -394,8 +553,6 @@ body {
     border-radius: 5px;
     border: 1px dashed #E1E1E1;
 }
-
-/* --- NOVA ESTILIZAÇÃO DO MODAL --- */
 
 .modal {
     display: none;
@@ -471,7 +628,7 @@ body {
     font-weight: 600;
     color: #6a1b9a;
     margin-bottom: -6px;
-    font-family: 'Poppins', sans-serif;
+    font-family: 'Inter', sans-serif;
     width: 100%;
     max-width: 400px;
     text-align: left;
@@ -486,7 +643,7 @@ body {
     border: 2px solid #e8e8e8;
     border-radius: 8px;
     font-size: 15px;
-    font-family: 'Poppins', sans-serif;
+    font-family: 'Inter', sans-serif;
     box-sizing: border-box;
     transition: all 0.3s ease;
     background-color: #fafafa;
@@ -510,9 +667,8 @@ body {
     margin-top: 16px;
 }
 
-/* --- BOTÕES DO MODAL --- */
 #form-evento button[type="submit"] {
-    background: linear-gradient(to right, #6a1b9a, #4a148c);
+    background-color: var(--accent-color);
     color: white;
     border: none;
     padding: 10px 20px;
@@ -521,13 +677,13 @@ body {
     font-size: 15px;
     cursor: pointer;
     transition: all 0.3s ease;
-    font-family: 'Poppins', sans-serif;
+    font-family: 'Inter', sans-serif;
 }
 
 #form-evento button[type="submit"]:hover {
     transform: translateY(-2px);
-    box-shadow: 0 6px 15px rgba(74, 20, 140, 0.4);
-    background: linear-gradient(to right, #7b1fa2, #5e35b1);
+    box-shadow: 0 6px 15px rgba(0, 0, 0, 0.12);
+    background-color: var(--accent-color-dark);
 }
 
 #form-evento button[type="button"] {
@@ -540,13 +696,13 @@ body {
     font-size: 15px;
     cursor: pointer;
     transition: all 0.3s ease;
-    font-family: 'Poppins', sans-serif;
+    font-family: 'Inter', sans-serif;
 }
 
 #form-evento button[type="button"]:hover {
     background: #e9ecef;
-    border-color: #6a1b9a;
-    color: #6a1b9a;
+    border-color: var(--accent-color);
+    color: var(--accent-color);
     transform: translateY(-1px);
 }
 
@@ -715,4 +871,3 @@ body {
         font-size: 14px;
     }
 }
-
