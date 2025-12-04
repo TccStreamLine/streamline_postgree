@@ -39,13 +39,19 @@ $nome_empresa = $_SESSION['nome_empresa'] ?? 'Empresa';
     <link rel="stylesheet" href="css/sistema.css">
     <link rel="stylesheet" href="css/estoque.css">
     <style>
-        /* Estilo específico para o botão de pedido ficar no padrão */
+        /* Estilo para o botão de pedido ficar roxo (Padrão Streamline) */
         .btn-pedido {
-            background-color: var(--primary-color, #6D28D9); /* Usa a cor padrão do sistema */
+            background-color: #6D28D9; /* Roxo padrão */
             color: white;
+            border: none;
         }
         .btn-pedido:hover {
-            filter: brightness(0.9);
+            background-color: #5b21b6; /* Roxo mais escuro no hover */
+            color: white;
+        }
+        /* Garante que o ícone fique centralizado como os outros */
+        .btn-action i {
+            pointer-events: none;
         }
     </style>
 </head>

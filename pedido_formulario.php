@@ -51,34 +51,57 @@ $nome_empresa = $_SESSION['nome_empresa'] ?? 'Empresa';
     <link rel="stylesheet" href="css/sistema.css">
     <link rel="stylesheet" href="css/venda_formulario.css"> 
     <style>
-        /* Pequenos ajustes para a info do fornecedor ficarem bonitos no padrão */
+        /* CARD DO FORNECEDOR (AGORA LILÁS) */
         .info-fornecedor-card {
-            background-color: #f8f9fa;
-            border-left: 4px solid var(--primary-color);
+            background-color: #F3E8FF; /* Fundo Lilás bem claro */
+            border-left: 5px solid #6D28D9; /* Borda Roxo forte */
             padding: 15px 20px;
             margin-bottom: 25px;
             border-radius: 4px;
             display: flex;
             justify-content: space-between;
             align-items: center;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.05);
         }
         .info-fornecedor-card h4 {
             margin: 0 0 5px 0;
-            color: #1F2937;
+            color: #4C1D95; /* Roxo muito escuro para texto */
             font-size: 1.1rem;
+            font-weight: 700;
         }
         .info-fornecedor-card p {
             margin: 0;
-            color: #6B7280;
+            color: #5B21B6; /* Roxo escuro */
             font-size: 0.9rem;
         }
         .badge-fornecedor {
-            background-color: #E0E7FF;
-            color: var(--primary-color);
-            padding: 5px 10px;
+            background-color: #6D28D9;
+            color: white;
+            padding: 6px 12px;
             border-radius: 20px;
             font-size: 0.85rem;
             font-weight: 600;
+        }
+
+        /* BOTÃO CANCELAR (AGORA PARECE UM BOTÃO REAL) */
+        .btn-cancel-custom {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            background-color: #9CA3AF; /* Cinza */
+            color: white !important;
+            padding: 12px 24px;
+            border-radius: 8px;
+            font-weight: 600;
+            text-decoration: none;
+            transition: all 0.2s ease;
+            border: none;
+            cursor: pointer;
+            margin-right: 10px;
+        }
+        .btn-cancel-custom:hover {
+            background-color: #6B7280; /* Cinza mais escuro */
+            transform: translateY(-1px);
         }
     </style>
 </head>
@@ -87,7 +110,8 @@ $nome_empresa = $_SESSION['nome_empresa'] ?? 'Empresa';
     <main class="main-content">
         <?php include 'header.php'; ?>
 
-        <div class="form-produto-container"> <h3 class="form-produto-title">NOVO PEDIDO DE COMPRA</h3>
+        <div class="form-produto-container">
+            <h3 class="form-produto-title">NOVO PEDIDO DE COMPRA</h3>
 
             <div class="info-fornecedor-card">
                 <div>
@@ -155,7 +179,9 @@ $nome_empresa = $_SESSION['nome_empresa'] ?? 'Empresa';
                         <span>Total do Pedido:</span>
                         <strong id="display-total" style="color: var(--primary-color);">R$ 0,00</strong>
                     </div>
-                    <div class="form-produto-actions" style="margin: 0;"> <a href="fornecedores.php" class="btn-cancel" style="text-decoration: none; color: #6B7280; margin-right: 15px; font-weight: 500;">Cancelar</a>
+                    <div class="form-produto-actions" style="margin: 0; display: flex;"> 
+                        <a href="fornecedores.php" class="btn-cancel-custom">Cancelar</a>
+                        
                         <button type="submit" class="btn-produto-primary">Finalizar Pedido</button>
                     </div>
                 </div>
@@ -166,7 +192,6 @@ $nome_empresa = $_SESSION['nome_empresa'] ?? 'Empresa';
     <script src="main.js"></script>
     <script src="notificacoes.js"></script>
     <script>
-        // Script JS (In-line para garantir funcionamento sem cache de arquivo externo)
         const selectProduto = document.getElementById('select-produto');
         const inputQtd = document.getElementById('input-qtd');
         const inputValor = document.getElementById('input-valor');
@@ -176,7 +201,6 @@ $nome_empresa = $_SESSION['nome_empresa'] ?? 'Empresa';
         const displayTotal = document.getElementById('display-total');
         let itensPedido = [];
 
-        // Formata moeda visualmente
         inputValor.addEventListener('input', function(e) {
             let value = e.target.value.replace(/\D/g, '');
             value = (value / 100).toFixed(2) + '';
@@ -185,13 +209,10 @@ $nome_empresa = $_SESSION['nome_empresa'] ?? 'Empresa';
             e.target.value = value;
         });
 
-        // Ao selecionar produto, puxa o valor de compra
         selectProduto.addEventListener('change', function() {
             const option = this.options[this.selectedIndex];
             if (option.value) {
-                // Formata o valor do data-attribute para o input
                 let valor = parseFloat(option.dataset.valor).toFixed(2).replace('.', ',');
-                // Adiciona mascara simples de milhar se necessário (opcional aqui)
                 inputValor.value = valor;
                 inputQtd.focus();
             }
@@ -206,7 +227,6 @@ $nome_empresa = $_SESSION['nome_empresa'] ?? 'Empresa';
             
             const nome = selectProduto.options[selectProduto.selectedIndex].dataset.nome;
             const qtd = parseInt(inputQtd.value);
-            // Limpa a formatação moeda para float (PT-BR -> US)
             const valorRaw = inputValor.value.replace(/\./g, '').replace(',', '.');
             const valor = parseFloat(valorRaw) || 0;
 
@@ -218,7 +238,6 @@ $nome_empresa = $_SESSION['nome_empresa'] ?? 'Empresa';
             itensPedido.push({ produto_id: produtoId, nome, quantidade: qtd, valor_compra: valor });
             renderizarItens();
             
-            // Reset dos campos
             selectProduto.value = '';
             inputQtd.value = 1;
             inputValor.value = '';
@@ -264,7 +283,6 @@ $nome_empresa = $_SESSION['nome_empresa'] ?? 'Empresa';
             renderizarItens();
         };
         
-        // Intercepta o submit para validar se tem itens
         document.getElementById('form-pedido').addEventListener('submit', function(e) {
             if (itensPedido.length === 0) {
                 e.preventDefault();
