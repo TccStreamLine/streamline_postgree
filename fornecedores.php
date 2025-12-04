@@ -14,6 +14,7 @@ $erro_busca = null;
 $usuario_id = $_SESSION['id'];
 
 try {
+    // Busca apenas fornecedores deste usuário
     $sql = "SELECT * FROM fornecedores 
             WHERE usuario_id = :usuario_id AND status = 'ativo' 
             ORDER BY razao_social ASC";
@@ -35,9 +36,6 @@ $nome_empresa = $_SESSION['nome_empresa'] ?? 'Empresa';
     <title>Gerenciar Fornecedores - Streamline</title>
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <link rel="stylesheet" href="css/sistema.css">
     <link rel="stylesheet" href="css/estoque.css">
@@ -60,7 +58,7 @@ $nome_empresa = $_SESSION['nome_empresa'] ?? 'Empresa';
             <?php if (isset($_SESSION['fornecedor_link_manual'])): ?>
                 <div class="alert alert-warning" style="word-break: break-all; margin-top: 20px;">
                     <h3>🚨 ATENÇÃO: Link de Ativação Manual 🚨</h3>
-                    <p>Durante a demonstração, use este link para que o fornecedor crie a senha. O envio por e-mail foi desativado por restrições de hospedagem (Railway).</p>
+                    <p>Durante a demonstração, use este link para que o fornecedor crie a senha. O envio por e-mail foi desativado por restrições de hospedagem.</p>
                     <a href="<?= htmlspecialchars($_SESSION['fornecedor_link_manual']) ?>" target="_blank" style="color: #6D28D9; font-weight: bold; text-decoration: underline;">
                         <?= htmlspecialchars($_SESSION['fornecedor_link_manual']); ?>
                     </a>
@@ -74,7 +72,7 @@ $nome_empresa = $_SESSION['nome_empresa'] ?? 'Empresa';
                 <input type="text" placeholder="Pesquisar Fornecedor...">
             </div>
             <div class="actions-buttons">
-                <a href="pedido_formulario.php" class="btn-secondary">Fazer Novo Pedido</a>
+                <a href="historico_pedidos.php" class="btn-secondary">Histórico de Pedidos</a>
                 <a href="fornecedor_formulario.php" class="btn-primary">
                     <i class="fas fa-plus"></i> Cadastrar Fornecedor
                 </a>
@@ -87,28 +85,27 @@ $nome_empresa = $_SESSION['nome_empresa'] ?? 'Empresa';
                     <tr>
                         <th>Razão Social</th>
                         <th>CNPJ</th>
-                        <th>E-mail</th>
                         <th>Telefone</th>
-                        <th>Status</th>
                         <th>Ações</th>
                     </tr>
                 </thead>
                 <tbody>
                     <?php if ($erro_busca): ?>
-                        <tr><td colspan="6" class="text-center"><?= htmlspecialchars($erro_busca) ?></td></tr>
+                        <tr><td colspan="4" class="text-center"><?= htmlspecialchars($erro_busca) ?></td></tr>
                     <?php elseif (empty($fornecedores)): ?>
-                        <tr><td colspan="6" class="text-center">Nenhum fornecedor cadastrado.</td></tr>
+                        <tr><td colspan="4" class="text-center">Nenhum fornecedor cadastrado.</td></tr>
                     <?php else: ?>
                         <?php foreach ($fornecedores as $fornecedor): ?>
                             <tr>
                                 <td><?= htmlspecialchars($fornecedor['razao_social']) ?></td>
                                 <td><?= htmlspecialchars($fornecedor['cnpj']) ?></td>
-                                <td><?= htmlspecialchars($fornecedor['email'] ?? 'N/A') ?></td>
                                 <td><?= htmlspecialchars($fornecedor['telefone'] ?? 'N/A') ?></td>
-                                <td><span class="status-badge status-<?= strtolower($fornecedor['status']) ?>"><?= htmlspecialchars($fornecedor['status']) ?></span></td>
                                 <td class="actions">
-                                    <a href="fornecedor_formulario.php?id=<?= $fornecedor['id'] ?>" class="btn-action btn-edit"><i class="fas fa-pencil-alt"></i></a>
-                                    <a href="excluir_fornecedor.php?id=<?= $fornecedor['id'] ?>" class="btn-action btn-delete"><i class="fas fa-trash-alt"></i></a>
+                                    <a href="pedido_formulario.php?fornecedor_id=<?= $fornecedor['id'] ?>" class="btn-action" title="Fazer Pedido" style="background-color: #10B981; color: white;">
+                                        <i class="fas fa-shopping-cart"></i>
+                                    </a>
+                                    <a href="fornecedor_formulario.php?id=<?= $fornecedor['id'] ?>" class="btn-action btn-edit" title="Editar"><i class="fas fa-pencil-alt"></i></a>
+                                    <a href="excluir_fornecedor.php?id=<?= $fornecedor['id'] ?>" class="btn-action btn-delete" title="Excluir"><i class="fas fa-trash-alt"></i></a>
                                 </td>
                             </tr>
                         <?php endforeach; ?>

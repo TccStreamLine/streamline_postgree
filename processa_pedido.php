@@ -20,20 +20,15 @@ if (!$fornecedor_id || empty($itens)) {
 try {
     $pdo->beginTransaction();
 
-    // 1. Calcular o valor total do pedido
+    // 1. Calcular o valor total
     $valor_total_pedido = 0;
     foreach ($itens as $item) {
-        // Remove formatação de moeda (R$ 1.000,00 -> 1000.00) se vier formatado, 
-        // ou usa direto se vier do input hidden limpo.
-        // No seu JS, o valor vem formatado no input visível, mas idealmente pegamos do banco ou limpamos.
-        // Vamos limpar por segurança:
-        $valor_limpo = str_replace(['.', ','], ['', '.'], $item['valor_compra']); 
         $quantidade = (int)$item['quantidade'];
-        $valor_total_pedido += $quantidade * (float)$valor_limpo;
+        $valor_unitario = (float)$item['valor_compra'];
+        $valor_total_pedido += $quantidade * $valor_unitario;
     }
 
-    // 2. Criar o Pedido (Capa) - MUDANÇA CRÍTICA PARA POSTGRESQL
-    // Usamos RETURNING id para pegar o ID gerado com segurança
+    // 2. Criar o Pedido (Compatível Postgres)
     $sql_pedido = "INSERT INTO pedidos_fornecedor 
                    (usuario_id, fornecedor_id, valor_total_pedido, status_pedido, data_pedido) 
                    VALUES (?, ?, ?, 'Pendente', CURRENT_TIMESTAMP) 
@@ -48,7 +43,7 @@ try {
         throw new Exception("Erro ao gerar ID do pedido.");
     }
 
-    // 3. Inserir os Itens do Pedido
+    // 3. Inserir os Itens
     $sql_item = "INSERT INTO pedido_fornecedor_itens 
                  (pedido_id, produto_id, quantidade_pedida, valor_unitario_pago) 
                  VALUES (?, ?, ?, ?)";
@@ -57,7 +52,7 @@ try {
     foreach ($itens as $item) {
         $prod_id = (int)$item['produto_id'];
         $qtd = (int)$item['quantidade'];
-        $val_unit = (float)str_replace(['.', ','], ['', '.'], $item['valor_compra']);
+        $val_unit = (float)$item['valor_compra'];
 
         if ($prod_id > 0 && $qtd > 0) {
             $stmt_item->execute([$pedido_id, $prod_id, $qtd, $val_unit]);
@@ -66,7 +61,7 @@ try {
 
     $pdo->commit();
     $_SESSION['msg_sucesso'] = "Pedido #$pedido_id realizado com sucesso!";
-    header('Location: fornecedores.php');
+    header('Location: fornecedores.php'); // ou historico_pedidos.php
     exit;
 
 } catch (Exception $e) {
