@@ -14,7 +14,6 @@ $erro_busca = null;
 $usuario_id = $_SESSION['id'];
 
 try {
-    // Busca apenas fornecedores deste usuário
     $sql = "SELECT * FROM fornecedores 
             WHERE usuario_id = :usuario_id AND status = 'ativo' 
             ORDER BY razao_social ASC";
@@ -39,6 +38,16 @@ $nome_empresa = $_SESSION['nome_empresa'] ?? 'Empresa';
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <link rel="stylesheet" href="css/sistema.css">
     <link rel="stylesheet" href="css/estoque.css">
+    <style>
+        /* Estilo específico para o botão de pedido ficar no padrão */
+        .btn-pedido {
+            background-color: var(--primary-color, #6D28D9); /* Usa a cor padrão do sistema */
+            color: white;
+        }
+        .btn-pedido:hover {
+            filter: brightness(0.9);
+        }
+    </style>
 </head>
 
 <body>
@@ -101,7 +110,7 @@ $nome_empresa = $_SESSION['nome_empresa'] ?? 'Empresa';
                                 <td><?= htmlspecialchars($fornecedor['cnpj']) ?></td>
                                 <td><?= htmlspecialchars($fornecedor['telefone'] ?? 'N/A') ?></td>
                                 <td class="actions">
-                                    <a href="pedido_formulario.php?fornecedor_id=<?= $fornecedor['id'] ?>" class="btn-action" title="Fazer Pedido" style="background-color: #10B981; color: white;">
+                                    <a href="pedido_formulario.php?fornecedor_id=<?= $fornecedor['id'] ?>" class="btn-action btn-pedido" title="Fazer Pedido">
                                         <i class="fas fa-shopping-cart"></i>
                                     </a>
                                     <a href="fornecedor_formulario.php?id=<?= $fornecedor['id'] ?>" class="btn-action btn-edit" title="Editar"><i class="fas fa-pencil-alt"></i></a>
