@@ -2,7 +2,7 @@
 session_start();
 include_once('config.php');
 
-// Verifica se está logado e se é fornecedor
+// Verifica login de fornecedor
 if (empty($_SESSION['id']) || $_SESSION['role'] !== 'fornecedor') {
     header('Location: login.php');
     exit;
@@ -15,8 +15,6 @@ $pedidos = [];
 $erro_busca = null;
 
 try {
-    // Busca pedidos feitos PARA este fornecedor
-    // Mostra o nome da empresa cliente (usuarios.nome_empresa)
     $sql = "SELECT p.*, u.nome_empresa as cliente_nome, u.telefone as cliente_telefone
             FROM pedidos_fornecedor p
             JOIN usuarios u ON p.usuario_id = u.id
@@ -31,7 +29,6 @@ try {
     $erro_busca = "Erro ao buscar pedidos: " . $e->getMessage();
 }
 
-// Nome do fornecedor para o header
 $nome_empresa = $_SESSION['nome_empresa'] ?? 'Fornecedor'; 
 ?>
 <!DOCTYPE html>
@@ -110,9 +107,8 @@ $nome_empresa = $_SESSION['nome_empresa'] ?? 'Fornecedor';
                                     </span>
                                 </td>
                                 <td class="actions">
-                                    <a href="editar_pedidos.php?id=<?= $pedido['id'] ?>" class="btn-action btn-edit" title="Gerenciar Pedido">
-                                        <i class="fas fa-edit"></i>
-                                    </a>
+                                    <a href="entregar_produto.php?pedido_id=<?= $pedido['id'] ?>" class="btn-action btn-edit" title="Realizar Entrega / Ver Detalhes">
+                                        <i class="fas fa-box-open"></i> </a>
                                 </td>
                             </tr>
                         <?php endforeach; ?>
