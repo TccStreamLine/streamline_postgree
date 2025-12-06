@@ -2,82 +2,117 @@
 session_start();
 include_once('config.php');
 
-// Proteção: Apenas fornecedores logados podem acessar
-if (empty($_SESSION['id_fornecedor'])) {
+// Verifica se está logado e se é fornecedor
+if (empty($_SESSION['id']) || $_SESSION['role'] !== 'fornecedor') {
     header('Location: login.php');
     exit;
 }
 
-$fornecedor_id = $_SESSION['id_fornecedor'];
-$nome_fornecedor = $_SESSION['nome_fornecedor'] ?? 'Fornecedor';
-
+$fornecedor_id = $_SESSION['id'];
 $pagina_ativa = 'fornecimento';
 $titulo_header = 'Gerenciar Fornecimento';
+$pedidos = [];
+$erro_busca = null;
 
-// Lógica para buscar produtos com estoque baixo associados a este fornecedor
-// Query compatível com PostgreSQL e MySQL
-$produtos_a_repor = [];
 try {
-    $stmt = $pdo->prepare(
-        "SELECT p.*, c.nome as categoria_nome 
-         FROM produtos p
-         LEFT JOIN categorias c ON p.categoria_id = c.id
-         WHERE p.fornecedor_id = ? AND p.quantidade_estoque <= p.quantidade_minima AND p.status = 'ativo'
-         ORDER BY p.nome ASC"
-    );
-    $stmt->execute([$fornecedor_id]);
-    $produtos_a_repor = $stmt->fetchAll(PDO::FETCH_ASSOC);
+    // Busca pedidos feitos PARA este fornecedor
+    // Mostra o nome da empresa cliente (usuarios.nome_empresa)
+    $sql = "SELECT p.*, u.nome_empresa as cliente_nome, u.telefone as cliente_telefone
+            FROM pedidos_fornecedor p
+            JOIN usuarios u ON p.usuario_id = u.id
+            WHERE p.fornecedor_id = :id 
+            ORDER BY p.data_pedido DESC";
+
+    $stmt = $pdo->prepare($sql);
+    $stmt->execute([':id' => $fornecedor_id]);
+    $pedidos = $stmt->fetchAll(PDO::FETCH_ASSOC);
+
 } catch (PDOException $e) {
-    // Tratar erro, se necessário
+    $erro_busca = "Erro ao buscar pedidos: " . $e->getMessage();
 }
+
+// Nome do fornecedor para o header
+$nome_empresa = $_SESSION['nome_empresa'] ?? 'Fornecedor'; 
 ?>
 <!DOCTYPE html>
 <html lang="pt-br">
+
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Gerenciar Fornecimento - Streamline</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <link rel="stylesheet" href="css/sistema.css">
     <link rel="stylesheet" href="css/estoque.css">
+    <style>
+        .status-badge {
+            padding: 5px 12px;
+            border-radius: 20px;
+            font-size: 0.85rem;
+            font-weight: 600;
+            text-transform: uppercase;
+        }
+        .status-pendente { background-color: #FEF3C7; color: #D97706; }
+        .status-aprovado { background-color: #D1FAE5; color: #059669; }
+        .status-recusado { background-color: #FEE2E2; color: #DC2626; }
+        .status-entregue { background-color: #DBEAFE; color: #2563EB; }
+    </style>
 </head>
+
 <body>
     <?php include 'sidebar.php'; ?>
 
     <main class="main-content">
-        <?php 
-            // Para o header do fornecedor, usamos o nome dele, não o da empresa
-            $nome_empresa = $nome_fornecedor;
-            include 'header.php'; 
-        ?>
-        
-        <div class="actions-container">
-            <div class="search-bar"><i class="fas fa-search"></i><input type="text" placeholder="Pesquisar Produto para entregar..."></div>
+        <?php include 'header.php'; ?>
+
+        <div class="message-container">
+            <?php if (isset($_SESSION['msg_sucesso'])): ?>
+                <div class="alert alert-success"><?= $_SESSION['msg_sucesso']; unset($_SESSION['msg_sucesso']); ?></div>
+            <?php endif; ?>
+            <?php if (isset($_SESSION['msg_erro'])): ?>
+                <div class="alert alert-danger"><?= $_SESSION['msg_erro']; unset($_SESSION['msg_erro']); ?></div>
+            <?php endif; ?>
         </div>
 
         <div class="table-container">
+            <h3>Pedidos Recebidos</h3>
             <table>
                 <thead>
                     <tr>
-                        <th>Produto</th>
-                        <th>Estoque Atual</th>
-                        <th>Estoque Mínimo</th>
-                        <th>Valor de Compra (R$)</th>
-                        <th>Ação</th>
+                        <th>Pedido #</th>
+                        <th>Data</th>
+                        <th>Cliente (Empresa)</th>
+                        <th>Valor Total</th>
+                        <th>Status</th>
+                        <th>Ações</th>
                     </tr>
                 </thead>
                 <tbody>
-                    <?php if (empty($produtos_a_repor)): ?>
-                        <tr><td colspan="5" class="text-center">Nenhum produto precisando de reposição no momento.</td></tr>
+                    <?php if ($erro_busca): ?>
+                        <tr><td colspan="6" class="text-center"><?= htmlspecialchars($erro_busca) ?></td></tr>
+                    <?php elseif (empty($pedidos)): ?>
+                        <tr><td colspan="6" class="text-center">Nenhum pedido recebido ainda.</td></tr>
                     <?php else: ?>
-                        <?php foreach ($produtos_a_repor as $produto): ?>
+                        <?php foreach ($pedidos as $pedido): ?>
                             <tr>
-                                <td><?= htmlspecialchars($produto['nome']) ?></td>
-                                <td><?= htmlspecialchars($produto['quantidade_estoque']) ?></td>
-                                <td><?= htmlspecialchars($produto['quantidade_minima']) ?></td>
-                                <td><?= number_format((float)$produto['valor_compra'], 2, ',', '.') ?></td>
+                                <td>#<?= htmlspecialchars($pedido['id']) ?></td>
+                                <td><?= date('d/m/Y H:i', strtotime($pedido['data_pedido'])) ?></td>
                                 <td>
-                                    <a href="entregar_produto.php?id=<?= $produto['id'] ?>" class="btn-primary" style="padding: 0.5rem 1rem; text-decoration: none;">Entregar</a>
+                                    <?= htmlspecialchars($pedido['cliente_nome']) ?>
+                                    <br>
+                                    <span style="font-size: 0.8rem; color: #666;"><?= htmlspecialchars($pedido['cliente_telefone']) ?></span>
+                                </td>
+                                <td>R$ <?= number_format($pedido['valor_total_pedido'], 2, ',', '.') ?></td>
+                                <td>
+                                    <span class="status-badge status-<?= strtolower($pedido['status_pedido']) ?>">
+                                        <?= htmlspecialchars($pedido['status_pedido']) ?>
+                                    </span>
+                                </td>
+                                <td class="actions">
+                                    <a href="editar_pedidos.php?id=<?= $pedido['id'] ?>" class="btn-action btn-edit" title="Gerenciar Pedido">
+                                        <i class="fas fa-edit"></i>
+                                    </a>
                                 </td>
                             </tr>
                         <?php endforeach; ?>
@@ -86,8 +121,9 @@ try {
             </table>
         </div>
     </main>
+
     <script src="main.js"></script>
     <script src="notificacoes.js"></script>
-    <script src="notificacoes_fornecedor.js"></script>
+    <script src="notificacoes_fornecedor.js"></script> 
 </body>
 </html>
