@@ -56,7 +56,7 @@ $nome_empresa = $_SESSION['nome_empresa'] ?? 'Fornecedor';
     <link rel="stylesheet" href="css/sistema.css">
     <link rel="stylesheet" href="css/venda_formulario.css"> 
     <style>
-        /* Estilos específicos para a tela de entrega (Protótipo) */
+        /* CARD DE DETALHES */
         .detalhes-pedido-card {
             background-color: #fff;
             border: 1px solid #e5e7eb;
@@ -77,16 +77,58 @@ $nome_empresa = $_SESSION['nome_empresa'] ?? 'Fornecedor';
             padding-bottom: 0;
             margin-bottom: 0;
         }
-        .info-label {
-            color: #6B7280;
-            font-weight: 500;
+        .info-label { color: #6B7280; font-weight: 500; }
+        .info-value { color: #1F2937; font-weight: 600; }
+        
+        /* TABELA DE ITENS (ESTILIZADA) */
+        .tabela-itens-bonita {
+            width: 100%;
+            border-collapse: separate; 
+            border-spacing: 0;
+            border: 1px solid #E5E7EB;
+            border-radius: 8px;
+            overflow: hidden;
+            margin-top: 10px;
         }
-        .info-value {
-            color: #1F2937;
+        .tabela-itens-bonita thead th {
+            background-color: #F3E8FF; /* Lilás Claro */
+            color: #4C1D95; /* Roxo Escuro */
+            padding: 15px;
+            text-align: left;
             font-weight: 600;
+            border-bottom: 2px solid #D8B4FE;
+        }
+        .tabela-itens-bonita tbody td {
+            padding: 15px;
+            border-bottom: 1px solid #E5E7EB;
+            color: #374151;
+            vertical-align: middle;
+        }
+        .tabela-itens-bonita tbody tr:last-child td {
+            border-bottom: none;
+        }
+        .tabela-itens-bonita tbody tr:hover {
+            background-color: #F9FAFB;
         }
         
-        /* Área de Upload de Foto */
+        /* Input de Quantidade na Tabela */
+        .input-qtd-tabela {
+            width: 100px;
+            padding: 8px 12px;
+            border: 1px solid #D1D5DB;
+            border-radius: 6px;
+            text-align: center;
+            font-weight: 600;
+            color: #4B5563;
+            transition: all 0.2s;
+        }
+        .input-qtd-tabela:focus {
+            border-color: #6D28D9;
+            box-shadow: 0 0 0 3px rgba(109, 40, 217, 0.1);
+            outline: none;
+        }
+
+        /* AREA DE UPLOAD */
         .upload-area {
             border: 2px dashed #D1D5DB;
             border-radius: 8px;
@@ -98,26 +140,12 @@ $nome_empresa = $_SESSION['nome_empresa'] ?? 'Fornecedor';
             margin-top: 10px;
         }
         .upload-area:hover {
-            border-color: var(--primary-color);
+            border-color: #6D28D9;
             background-color: #F3E8FF;
         }
-        .upload-area i {
-            font-size: 2rem;
-            color: #9CA3AF;
-            margin-bottom: 10px;
-        }
-        .upload-area p {
-            color: #6B7280;
-            margin: 0;
-            font-size: 0.9rem;
-        }
-        #preview-img {
-            max-width: 100%;
-            max-height: 200px;
-            margin-top: 15px;
-            border-radius: 4px;
-            display: none;
-        }
+        .upload-area i { font-size: 2rem; color: #9CA3AF; margin-bottom: 10px; }
+        .upload-area p { color: #6B7280; margin: 0; font-size: 0.9rem; }
+        #preview-img { max-width: 100%; max-height: 200px; margin-top: 15px; border-radius: 4px; display: none; }
     </style>
 </head>
 <body>
@@ -154,34 +182,43 @@ $nome_empresa = $_SESSION['nome_empresa'] ?? 'Fornecedor';
                 <div class="form-produto-grid">
                     <div class="form-produto-group">
                         <label>Fornecedor (Você)</label>
-                        <input type="text" value="<?= htmlspecialchars($_SESSION['nome_empresa']) ?>" readonly style="background-color: #f3f4f6; cursor: not-allowed;">
+                        <input type="text" value="<?= htmlspecialchars($_SESSION['nome_empresa']) ?>" readonly style="background-color: #f3f4f6; cursor: not-allowed; border-color: #e5e7eb;">
                     </div>
-
                     <div class="form-produto-group">
                         <label>Data da Entrega</label>
                         <input type="date" name="data_entrega" value="<?= date('Y-m-d') ?>" required>
                     </div>
                 </div>
 
-                <div class="lista-itens-wrapper" style="margin: 20px 0;">
-                    <h4>Itens do Pedido</h4>
-                    <table class="tabela-itens">
+                <div class="lista-itens-wrapper" style="margin: 25px 0;">
+                    <h4 style="margin-bottom: 10px; color: #374151;">Itens a Entregar</h4>
+                    
+                    <table class="tabela-itens-bonita">
                         <thead>
                             <tr>
-                                <th>Produto</th>
-                                <th>Qtd. Solicitada</th>
-                                <th>Qtd. Entregue</th> </tr>
+                                <th style="width: 50%;">Produto</th>
+                                <th style="width: 25%; text-align: center;">Qtd. Solicitada</th>
+                                <th style="width: 25%; text-align: center;">Qtd. Entregue</th>
+                            </tr>
                         </thead>
                         <tbody>
                             <?php foreach ($itens as $index => $item): ?>
                                 <tr>
-                                    <td><?= htmlspecialchars($item['produto_nome']) ?></td>
-                                    <td><?= $item['quantidade_pedida'] ?></td>
                                     <td>
-                                        <input type="number" name="itens[<?= $item['id'] ?>]" 
+                                        <strong><?= htmlspecialchars($item['produto_nome']) ?></strong>
+                                    </td>
+                                    <td style="text-align: center;">
+                                        <span style="background: #E5E7EB; padding: 5px 10px; border-radius: 15px; font-weight: bold; font-size: 0.9rem;">
+                                            <?= $item['quantidade_pedida'] ?>
+                                        </span>
+                                    </td>
+                                    <td style="text-align: center;">
+                                        <input type="number" 
+                                               class="input-qtd-tabela"
+                                               name="itens[<?= $item['id'] ?>]" 
                                                value="<?= $item['quantidade_pedida'] ?>" 
-                                               min="0" max="<?= $item['quantidade_pedida'] ?>"
-                                               style="width: 80px; padding: 5px; border: 1px solid #ccc; border-radius: 4px;">
+                                               min="0" 
+                                               max="<?= $item['quantidade_pedida'] ?>">
                                     </td>
                                 </tr>
                             <?php endforeach; ?>
@@ -193,14 +230,14 @@ $nome_empresa = $_SESSION['nome_empresa'] ?? 'Fornecedor';
                     <label>Nota Fiscal (Foto/Comprovante)</label>
                     <div class="upload-area" onclick="document.getElementById('input-foto').click()">
                         <i class="fas fa-camera"></i>
-                        <p>Clique aqui para tirar uma foto ou enviar o arquivo da Nota Fiscal</p>
+                        <p>Clique aqui para anexar a foto da Nota Fiscal</p>
                         <input type="file" name="nota_fiscal" id="input-foto" accept="image/*,application/pdf" style="display: none;" onchange="previewImage(this)">
                     </div>
                     <img id="preview-img" alt="Pré-visualização da Nota">
                 </div>
 
                 <div class="venda-footer" style="margin-top: 30px; display: flex; justify-content: flex-end;">
-                    <a href="gerenciar_fornecimento.php" class="btn-cancel" style="margin-right: 15px; text-decoration: none; padding: 12px 20px; color: #666;">Cancelar</a>
+                    <a href="gerenciar_fornecimento.php" class="btn-cancel" style="margin-right: 15px; text-decoration: none; padding: 12px 20px; color: #666; display: flex; align-items: center;">Cancelar</a>
                     <button type="submit" class="btn-produto-primary">Confirmar Entrega</button>
                 </div>
             </form>
@@ -211,19 +248,17 @@ $nome_empresa = $_SESSION['nome_empresa'] ?? 'Fornecedor';
     <script src="notificacoes.js"></script>
     <script src="notificacoes_fornecedor.js"></script>
     <script>
-        // Função para mostrar prévia da imagem selecionada
         function previewImage(input) {
             const preview = document.getElementById('preview-img');
             if (input.files && input.files[0]) {
                 const reader = new FileReader();
                 reader.onload = function(e) {
-                    // Se for imagem, mostra. Se for PDF, mostra ícone genérico (opcional)
                     if(input.files[0].type.startsWith('image/')) {
                         preview.src = e.target.result;
                         preview.style.display = 'block';
                     } else {
                         preview.style.display = 'none';
-                        alert('Arquivo selecionado: ' + input.files[0].name);
+                        alert('Arquivo PDF selecionado: ' + input.files[0].name);
                     }
                 }
                 reader.readAsDataURL(input.files[0]);
