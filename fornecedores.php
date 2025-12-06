@@ -38,22 +38,6 @@ $nome_empresa = $_SESSION['nome_empresa'] ?? 'Empresa';
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <link rel="stylesheet" href="css/sistema.css">
     <link rel="stylesheet" href="css/estoque.css">
-    <style>
-        /* Estilo para o botão de pedido ficar roxo (Padrão Streamline) */
-        .btn-pedido {
-            background-color: #6D28D9; /* Roxo padrão */
-            color: white;
-            border: none;
-        }
-        .btn-pedido:hover {
-            background-color: #5b21b6; /* Roxo mais escuro no hover */
-            color: white;
-        }
-        /* Garante que o ícone fique centralizado como os outros */
-        .btn-action i {
-            pointer-events: none;
-        }
-    </style>
 </head>
 
 <body>
@@ -116,9 +100,10 @@ $nome_empresa = $_SESSION['nome_empresa'] ?? 'Empresa';
                                 <td><?= htmlspecialchars($fornecedor['cnpj']) ?></td>
                                 <td><?= htmlspecialchars($fornecedor['telefone'] ?? 'N/A') ?></td>
                                 <td class="actions">
-                                    <a href="pedido_formulario.php?fornecedor_id=<?= $fornecedor['id'] ?>" class="btn-action btn-pedido" title="Fazer Pedido">
+                                    <a href="pedido_formulario.php?fornecedor_id=<?= $fornecedor['id'] ?>" class="btn-action btn-edit" title="Fazer Pedido">
                                         <i class="fas fa-shopping-cart"></i>
                                     </a>
+                                    
                                     <a href="fornecedor_formulario.php?id=<?= $fornecedor['id'] ?>" class="btn-action btn-edit" title="Editar"><i class="fas fa-pencil-alt"></i></a>
                                     <a href="excluir_fornecedor.php?id=<?= $fornecedor['id'] ?>" class="btn-action btn-delete" title="Excluir"><i class="fas fa-trash-alt"></i></a>
                                 </td>
