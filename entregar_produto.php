@@ -56,7 +56,6 @@ $nome_empresa = $_SESSION['nome_empresa'] ?? 'Fornecedor';
     <link rel="stylesheet" href="css/sistema.css">
     <link rel="stylesheet" href="css/venda_formulario.css"> 
     <style>
-        /* CARD DE DETALHES */
         .detalhes-pedido-card {
             background-color: #fff;
             border: 1px solid #e5e7eb;
@@ -80,7 +79,7 @@ $nome_empresa = $_SESSION['nome_empresa'] ?? 'Fornecedor';
         .info-label { color: #6B7280; font-weight: 500; }
         .info-value { color: #1F2937; font-weight: 600; }
         
-        /* TABELA DE ITENS (ESTILIZADA) */
+        /* TABELA */
         .tabela-itens-bonita {
             width: 100%;
             border-collapse: separate; 
@@ -91,8 +90,8 @@ $nome_empresa = $_SESSION['nome_empresa'] ?? 'Fornecedor';
             margin-top: 10px;
         }
         .tabela-itens-bonita thead th {
-            background-color: #F3E8FF; /* Lilás Claro */
-            color: #4C1D95; /* Roxo Escuro */
+            background-color: #F3E8FF;
+            color: #4C1D95;
             padding: 15px;
             text-align: left;
             font-weight: 600;
@@ -111,7 +110,6 @@ $nome_empresa = $_SESSION['nome_empresa'] ?? 'Fornecedor';
             background-color: #F9FAFB;
         }
         
-        /* Input de Quantidade na Tabela */
         .input-qtd-tabela {
             width: 100px;
             padding: 8px 12px;
@@ -128,7 +126,6 @@ $nome_empresa = $_SESSION['nome_empresa'] ?? 'Fornecedor';
             outline: none;
         }
 
-        /* AREA DE UPLOAD */
         .upload-area {
             border: 2px dashed #D1D5DB;
             border-radius: 8px;
@@ -215,7 +212,7 @@ $nome_empresa = $_SESSION['nome_empresa'] ?? 'Fornecedor';
                                     <td style="text-align: center;">
                                         <input type="number" 
                                                class="input-qtd-tabela"
-                                               name="itens[<?= $item['id'] ?>]" 
+                                               name="itens[<?= $item['produto_id'] ?>]" 
                                                value="<?= $item['quantidade_pedida'] ?>" 
                                                min="0" 
                                                max="<?= $item['quantidade_pedida'] ?>">
