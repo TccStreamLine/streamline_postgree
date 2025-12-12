@@ -8,180 +8,199 @@ if (empty($_SESSION['id'])) {
 }
 
 $pagina_ativa = 'dashboard';
-$titulo_header = 'Dashboard';
+$titulo_header = 'Visão Geral Executiva';
 $usuario_id = $_SESSION['id'];
 $nome_empresa = $_SESSION['nome_empresa'] ?? 'Empresa';
 
+// Captura o período do gráfico
+$periodo = $_GET['periodo'] ?? 'diario'; 
 
-// --- 1. FATURAMENTO MÊS ATUAL ---
-// Mudança: MONTH() -> EXTRACT(MONTH FROM ...)
-// Mudança: CURDATE() -> CURRENT_DATE
-$faturamento_mes_stmt = $pdo->prepare("
-    SELECT SUM(valor_total) as total 
-    FROM vendas 
-    WHERE usuario_id = ? 
-    AND EXTRACT(MONTH FROM data_venda) = EXTRACT(MONTH FROM CURRENT_DATE) 
-    AND EXTRACT(YEAR FROM data_venda) = EXTRACT(YEAR FROM CURRENT_DATE) 
-    AND status = 'finalizada'
-");
-$faturamento_mes_stmt->execute([$usuario_id]);
-$faturamento_mes = $faturamento_mes_stmt->fetchColumn();
+// Data de hoje e dias passados no mês
+$hoje = new DateTime();
+$dias_no_mes = (int)$hoje->format('t');
+$dia_atual = (int)$hoje->format('d');
 
+// =============================================================
+// 1. FATURAMENTO E CRESCIMENTO (MÊS ATUAL VS ANTERIOR)
+// =============================================================
 
-// --- 2. VENDAS HOJE ---
-// Mudança: DATE(data) -> data::DATE
-$vendas_hoje_stmt = $pdo->prepare("
-    SELECT COUNT(id) as total 
-    FROM vendas 
-    WHERE usuario_id = ? 
-    AND data_venda::DATE = CURRENT_DATE 
-    AND status = 'finalizada'
-");
-$vendas_hoje_stmt->execute([$usuario_id]);
-$vendas_hoje = $vendas_hoje_stmt->fetchColumn();
+// Mês Atual
+$sql_mes_atual = "SELECT SUM(valor_total) FROM vendas WHERE usuario_id = ? AND status = 'finalizada' 
+                  AND EXTRACT(MONTH FROM data_venda) = EXTRACT(MONTH FROM CURRENT_DATE) 
+                  AND EXTRACT(YEAR FROM data_venda) = EXTRACT(YEAR FROM CURRENT_DATE)";
+$stmt = $pdo->prepare($sql_mes_atual);
+$stmt->execute([$usuario_id]);
+$faturamento_mes = $stmt->fetchColumn() ?: 0;
 
+// Mês Anterior (Para Comparação)
+$sql_mes_anterior = "SELECT SUM(valor_total) FROM vendas WHERE usuario_id = ? AND status = 'finalizada' 
+                     AND data_venda >= date_trunc('month', CURRENT_DATE - INTERVAL '1 month') 
+                     AND data_venda < date_trunc('month', CURRENT_DATE)";
+$stmt = $pdo->prepare($sql_mes_anterior);
+$stmt->execute([$usuario_id]);
+$faturamento_anterior = $stmt->fetchColumn() ?: 0;
 
-// --- 3. ESTOQUE BAIXO ---
-// (Compatível com ambos)
-$estoque_baixo_stmt = $pdo->prepare("SELECT COUNT(id) as total FROM produtos WHERE quantidade_estoque <= quantidade_minima AND status = 'ativo'");
-$estoque_baixo_stmt->execute();
-$estoque_baixo = $estoque_baixo_stmt->fetchColumn();
-
-
-// --- 4. FATURAMENTO DIÁRIO (GRÁFICO) ---
-// Mudança: INTERVAL 6 DAY -> INTERVAL '6 days' (com aspas)
-// Mudança: GROUP BY DATE(...) -> GROUP BY 1 (agrupa pela primeira coluna selecionada)
-$sql_faturamento_diario = "
-    SELECT data_venda::DATE as dia, SUM(valor_total) as total 
-    FROM vendas 
-    WHERE usuario_id = ? 
-    AND data_venda >= CURRENT_DATE - INTERVAL '6 days' 
-    AND data_venda::DATE <= CURRENT_DATE 
-    AND status = 'finalizada' 
-    GROUP BY 1 
-    ORDER BY 1 ASC
-";
-$stmt_faturamento_diario = $pdo->prepare($sql_faturamento_diario);
-$stmt_faturamento_diario->execute([$usuario_id]);
-$faturamento_diario_data = $stmt_faturamento_diario->fetchAll(PDO::FETCH_ASSOC);
-
-$labels_faturamento = [];
-$data_faturamento_map = [];
-for ($i = 6; $i >= 0; $i--) {
-    $date = date('Y-m-d', strtotime("-$i days"));
-    $labels_faturamento[] = date('d/m', strtotime($date));
-    $data_faturamento_map[$date] = 0; 
+// Cálculo de Crescimento (%)
+$crescimento = 0;
+if ($faturamento_anterior > 0) {
+    $crescimento = (($faturamento_mes - $faturamento_anterior) / $faturamento_anterior) * 100;
+} elseif ($faturamento_mes > 0) {
+    $crescimento = 100; // Se não tinha nada antes e agora tem, cresceu 100%
 }
-foreach ($faturamento_diario_data as $row) {
-    if (isset($data_faturamento_map[$row['dia']])) {
-        $data_faturamento_map[$row['dia']] = $row['total'];
+
+// =============================================================
+// 2. FLUXO DE CAIXA (VENDAS - COMPRAS FORNECEDOR)
+// =============================================================
+
+// Total Gasto com Fornecedores neste mês
+$sql_despesas = "SELECT SUM(valor_total_pedido) FROM pedidos_fornecedor 
+                 WHERE usuario_id = ? AND status_pedido != 'Cancelado'
+                 AND EXTRACT(MONTH FROM data_pedido) = EXTRACT(MONTH FROM CURRENT_DATE) 
+                 AND EXTRACT(YEAR FROM data_pedido) = EXTRACT(YEAR FROM CURRENT_DATE)";
+$stmt = $pdo->prepare($sql_despesas);
+$stmt->execute([$usuario_id]);
+$despesas_mes = $stmt->fetchColumn() ?: 0;
+
+$saldo_caixa = $faturamento_mes - $despesas_mes;
+
+// =============================================================
+// 3. PREVISÃO DE FECHAMENTO (FORECAST)
+// =============================================================
+// Regra de 3 simples: Se em X dias vendi Y, em 30 dias venderei Z.
+$previsao_mes = 0;
+if ($dia_atual > 0) {
+    $media_diaria = $faturamento_mes / $dia_atual;
+    $previsao_mes = $media_diaria * $dias_no_mes;
+}
+
+// =============================================================
+// 4. META VISUAL (Exemplo: Meta de R$ 50.000)
+// =============================================================
+$meta_vendas = 50000; 
+$porcentagem_meta = min(100, ($faturamento_mes / $meta_vendas) * 100);
+
+
+// =============================================================
+// 5. ESTOQUE E TICKETS
+// =============================================================
+// Vendas Hoje
+$vendas_hoje = $pdo->query("SELECT COUNT(id) FROM vendas WHERE usuario_id = $usuario_id AND data_venda::DATE = CURRENT_DATE AND status = 'finalizada'")->fetchColumn();
+
+// Estoque Baixo
+$estoque_baixo = $pdo->query("SELECT COUNT(id) FROM produtos WHERE usuario_id = $usuario_id AND quantidade_estoque <= quantidade_minima AND status = 'ativo'")->fetchColumn();
+
+// Ticket Médio
+$qtd_vendas_mes = $pdo->query("SELECT COUNT(id) FROM vendas WHERE usuario_id = $usuario_id AND EXTRACT(MONTH FROM data_venda) = EXTRACT(MONTH FROM CURRENT_DATE) AND status = 'finalizada'")->fetchColumn();
+$ticket_medio = ($qtd_vendas_mes > 0) ? ($faturamento_mes / $qtd_vendas_mes) : 0;
+
+
+// =============================================================
+// 6. DADOS DO GRÁFICO (Dinâmico)
+// =============================================================
+$labels_grafico = [];
+$data_grafico = [];
+$chart_title = "Evolução Financeira";
+
+try {
+    if ($periodo == 'diario') {
+        $chart_title = "Vendas Diárias (Últimos 7 Dias)";
+        $sql = "SELECT to_char(data_venda, 'DD/MM') as label, SUM(valor_total) as total FROM vendas WHERE usuario_id = ? AND data_venda >= CURRENT_DATE - INTERVAL '6 days' AND status = 'finalizada' GROUP BY 1, data_venda::DATE ORDER BY data_venda::DATE ASC";
+    } elseif ($periodo == 'semanal') {
+        $chart_title = "Vendas Semanais (Últimas 8 Semanas)";
+        $sql = "SELECT 'Semana ' || EXTRACT(WEEK FROM data_venda) as label, SUM(valor_total) as total, MIN(data_venda) as d FROM vendas WHERE usuario_id = ? AND data_venda >= CURRENT_DATE - INTERVAL '8 weeks' AND status = 'finalizada' GROUP BY EXTRACT(WEEK FROM data_venda) ORDER BY d ASC";
+    } elseif ($periodo == 'mensal') {
+        $chart_title = "Vendas Mensais (Último Ano)";
+        $sql = "SELECT to_char(data_venda, 'MM/YYYY') as label, SUM(valor_total) as total, date_trunc('month', data_venda) as d FROM vendas WHERE usuario_id = ? AND data_venda >= CURRENT_DATE - INTERVAL '12 months' AND status = 'finalizada' GROUP BY 1, d ORDER BY d ASC";
+    } else { // Anual
+        $chart_title = "Vendas Anuais";
+        $sql = "SELECT EXTRACT(YEAR FROM data_venda)::TEXT as label, SUM(valor_total) as total FROM vendas WHERE usuario_id = ? AND status = 'finalizada' GROUP BY 1 ORDER BY 1 ASC";
     }
-}
-$data_faturamento = array_values($data_faturamento_map);
 
+    $stmt = $pdo->prepare($sql);
+    $stmt->execute([$usuario_id]);
+    $res = $stmt->fetchAll(PDO::FETCH_ASSOC);
+    foreach ($res as $r) { $labels_grafico[] = $r['label']; $data_grafico[] = $r['total']; }
+} catch (Exception $e) { /* Silêncio é ouro aqui */ }
 
-// --- 5. VENDAS POR CATEGORIA ---
-$sql_vendas_categoria = "
-    SELECT c.nome, COUNT(vi.id) as total_vendas 
-    FROM venda_itens vi 
-    JOIN produtos p ON vi.produto_id = p.id 
-    JOIN categorias c ON p.categoria_id = c.id 
-    JOIN vendas v ON vi.venda_id = v.id 
-    WHERE v.usuario_id = ? 
-    AND v.status = 'finalizada' 
-    AND EXTRACT(MONTH FROM v.data_venda) = EXTRACT(MONTH FROM CURRENT_DATE) 
-    AND EXTRACT(YEAR FROM v.data_venda) = EXTRACT(YEAR FROM CURRENT_DATE) 
-    GROUP BY c.nome 
-    ORDER BY total_vendas DESC
-";
-$stmt_vendas_categoria = $pdo->prepare($sql_vendas_categoria);
-$stmt_vendas_categoria->execute([$usuario_id]);
-$vendas_categoria = $stmt_vendas_categoria->fetchAll(PDO::FETCH_ASSOC);
-$labels_categoria = [];
-$data_categoria = [];
-foreach ($vendas_categoria as $row) {
-    $labels_categoria[] = $row['nome'];
-    $data_categoria[] = $row['total_vendas'];
-}
-
-
-// --- 6. TOP PRODUTOS ---
-$sql_top_produtos = "
-    SELECT p.nome, SUM(vi.quantidade) as total_vendido 
-    FROM venda_itens vi 
-    JOIN produtos p ON vi.produto_id = p.id 
-    JOIN vendas v ON vi.venda_id = v.id 
-    WHERE v.usuario_id = ? 
-    AND v.status = 'finalizada' 
-    AND EXTRACT(MONTH FROM v.data_venda) = EXTRACT(MONTH FROM CURRENT_DATE) 
-    AND EXTRACT(YEAR FROM v.data_venda) = EXTRACT(YEAR FROM CURRENT_DATE) 
-    GROUP BY p.nome 
-    ORDER BY total_vendido DESC 
-    LIMIT 5
-";
-$stmt_top_produtos = $pdo->prepare($sql_top_produtos);
-$stmt_top_produtos->execute([$usuario_id]);
-$top_produtos = $stmt_top_produtos->fetchAll(PDO::FETCH_ASSOC);
-
-
-// --- 7. INSIGHT: MELHOR DIA ---
-// Mudança: DAYNAME() não existe igual. Criamos um CASE para traduzir o dia da semana (DOW - Day Of Week).
-// 0 = Domingo, 1 = Segunda, etc.
-$insight_melhor_dia_stmt = $pdo->prepare("
-    SELECT 
-        CASE EXTRACT(DOW FROM data_venda)
-            WHEN 0 THEN 'Domingo'
-            WHEN 1 THEN 'Segunda-feira'
-            WHEN 2 THEN 'Terça-feira'
-            WHEN 3 THEN 'Quarta-feira'
-            WHEN 4 THEN 'Quinta-feira'
-            WHEN 5 THEN 'Sexta-feira'
-            WHEN 6 THEN 'Sábado'
-        END as dia_pt, 
-        SUM(valor_total) as total 
-    FROM vendas 
-    WHERE usuario_id = ? 
-    AND data_venda >= CURRENT_DATE - INTERVAL '6 days' 
-    AND data_venda::DATE <= CURRENT_DATE 
-    AND status = 'finalizada' 
-    GROUP BY 1, EXTRACT(DOW FROM data_venda)
-    ORDER BY total DESC 
-    LIMIT 1
-");
-
-$insight_melhor_dia_stmt->execute([$usuario_id]);
-$melhor_dia = $insight_melhor_dia_stmt->fetch(PDO::FETCH_ASSOC);
-
-
-// --- 8. INSIGHT: PRODUTO CAMPEÃO SEMANA ---
-$insight_produto_campeao_stmt = $pdo->prepare("
-    SELECT p.nome 
-    FROM venda_itens vi 
-    JOIN produtos p ON vi.produto_id = p.id 
-    JOIN vendas v ON vi.venda_id = v.id 
-    WHERE v.usuario_id = ? 
-    AND v.status = 'finalizada' 
-    AND v.data_venda >= CURRENT_DATE - INTERVAL '6 days' 
-    AND v.data_venda::DATE <= CURRENT_DATE 
-    GROUP BY p.nome 
-    ORDER BY SUM(vi.quantidade) DESC 
-    LIMIT 1
-");
-$insight_produto_campeao_stmt->execute([$usuario_id]);
-$produto_campeao_semana = $insight_produto_campeao_stmt->fetchColumn();
+// =============================================================
+// 7. TOP PRODUTOS
+// =============================================================
+$top_produtos = $pdo->query("SELECT p.nome, SUM(vi.quantidade) as qtd FROM venda_itens vi JOIN vendas v ON vi.venda_id = v.id JOIN produtos p ON vi.produto_id = p.id WHERE v.usuario_id = $usuario_id AND v.status = 'finalizada' AND EXTRACT(MONTH FROM v.data_venda) = EXTRACT(MONTH FROM CURRENT_DATE) GROUP BY p.nome ORDER BY qtd DESC LIMIT 5")->fetchAll(PDO::FETCH_ASSOC);
 
 ?>
 <!DOCTYPE html>
 <html lang="pt-br">
-
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Dashboard - Streamline</title>
+    <title>Dashboard Pro - Streamline</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <link rel="stylesheet" href="css/sistema.css">
     <link rel="stylesheet" href="css/dashboard.css">
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+        /* CSS EXTRA PARA O MODO PRO */
+        .dashboard-grid-top {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 1.5rem;
+            margin-bottom: 2rem;
+        }
+        
+        .kpi-pro {
+            background: #fff;
+            padding: 20px;
+            border-radius: 12px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.03);
+            position: relative;
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+            height: 140px;
+        }
+        
+        .kpi-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            margin-bottom: 10px;
+        }
+        
+        .kpi-title { font-size: 0.85rem; color: #6B7280; font-weight: 600; text-transform: uppercase; }
+        .kpi-icon { 
+            width: 40px; height: 40px; 
+            border-radius: 10px; 
+            display: flex; align-items: center; justify-content: center;
+            font-size: 1.2rem;
+        }
+        
+        .kpi-value { font-size: 1.8rem; font-weight: 700; color: #1F2937; margin-bottom: 5px; }
+        
+        .badge-growth {
+            display: inline-flex; align-items: center; gap: 4px;
+            padding: 4px 8px; border-radius: 20px;
+            font-size: 0.75rem; font-weight: 600;
+        }
+        .growth-up { background: #D1FAE5; color: #059669; }
+        .growth-down { background: #FEE2E2; color: #DC2626; }
+        
+        /* Barra de Meta */
+        .goal-container { margin-top: auto; }
+        .goal-header { display: flex; justify-content: space-between; font-size: 0.75rem; color: #6B7280; margin-bottom: 4px; }
+        .progress-bg { width: 100%; height: 6px; background: #E5E7EB; border-radius: 3px; overflow: hidden; }
+        .progress-fill { height: 100%; background: linear-gradient(90deg, #6D28D9, #A78BFA); border-radius: 3px; }
+
+        /* Cores de ícones */
+        .bg-purple-light { background: #F3E8FF; color: #7C3AED; }
+        .bg-green-light { background: #ECFDF5; color: #10B981; }
+        .bg-blue-light { background: #EFF6FF; color: #3B82F6; }
+        .bg-orange-light { background: #FFF7ED; color: #F97316; }
+
+        /* Ajustes responsivos */
+        @media (max-width: 1200px) { .dashboard-grid-top { grid-template-columns: repeat(2, 1fr); } }
+        @media (max-width: 600px) { .dashboard-grid-top { grid-template-columns: 1fr; } }
+    </style>
 </head>
 
 <body>
@@ -190,147 +209,194 @@ $produto_campeao_semana = $insight_produto_campeao_stmt->fetchColumn();
     <main class="main-content">
         <?php include 'header.php'; ?>
 
-        <div class="dashboard-grid">
-            <div class="kpi-card">
-                <i class="fas fa-dollar-sign icon"></i>
-                <div class="kpi-info">
-                    <span class="kpi-value">R$ <?= number_format($faturamento_mes ?: 0, 2, ',', '.') ?></span>
-                    <span class="kpi-label">Faturamento este mês</span>
+        <div class="dashboard-grid-top">
+            
+            <div class="kpi-pro">
+                <div class="kpi-header">
+                    <span class="kpi-title">Faturamento Mês</span>
+                    <div class="kpi-icon bg-purple-light"><i class="fas fa-wallet"></i></div>
                 </div>
-            </div>
-
-            <a href="vendas.php?filtro=hoje" class="kpi-card clickable">
-                <i class="fas fa-shopping-cart icon"></i>
-                <div class="kpi-info">
-                    <span class="kpi-value"><?= $vendas_hoje ?: 0 ?></span>
-                    <span class="kpi-label">Vendas hoje</span>
-                </div>
-                <i class="fas fa-chevron-right arrow-icon"></i>
-            </a>
-
-            <a href="estoque.php?filtro=estoque_baixo" class="kpi-card clickable">
-                <i class="fas fa-exclamation-triangle icon danger"></i>
-                <div class="kpi-info">
-                    <span class="kpi-value"><?= $estoque_baixo ?: 0 ?></span>
-                    <span class="kpi-label">Produtos com estoque baixo</span>
-                </div>
-                <i class="fas fa-chevron-right arrow-icon"></i>
-            </a>
-
-            <div class="chart-card large">
-                <h3>Faturamento Diário (Últimos 7 dias)</h3>
-                <div class="chart-container"><canvas id="faturamentoDiarioChart"></canvas></div>
-            </div>
-
-
-            <div class="chart-card">
-                <h3>Vendas por Categoria</h3>
-                <div class="chart-container"><canvas id="vendasCategoriaChart"></canvas></div>
-            </div>
-
-            <div class="list-card">
-                <h3>Produtos Mais Vendidos</h3>
-                <ul>
-                    <?php if (empty($top_produtos)): ?>
-                        <li>Nenhuma venda registrada ainda.</li>
+                <div class="kpi-value">R$ <?= number_format($faturamento_mes, 2, ',', '.') ?></div>
+                <div>
+                    <?php if ($crescimento >= 0): ?>
+                        <span class="badge-growth growth-up"><i class="fas fa-arrow-up"></i> <?= number_format($crescimento, 1) ?>% vs mês anterior</span>
                     <?php else: ?>
-                        <?php foreach ($top_produtos as $produto): ?>
-                            <li>
-                                <span class="produto-nome"><?= htmlspecialchars($produto['nome']) ?></span>
-                                <span class="produto-qtd"><?= $produto['total_vendido'] ?> vendidos</span>
-                            </li>
-                        <?php endforeach; ?>
+                        <span class="badge-growth growth-down"><i class="fas fa-arrow-down"></i> <?= number_format(abs($crescimento), 1) ?>% vs mês anterior</span>
                     <?php endif; ?>
-                </ul>
+                </div>
             </div>
 
-            <div class="list-card" style="grid-column: span 2;">
-                <h3><i class="fas fa-lightbulb" style="color: #F59E0B;"></i> Insights da Semana</h3>
-                <ul>
-                    <?php if ($melhor_dia): ?>
-                        <li class="insight-item">O dia de maior faturamento nos últimos 7 dias foi <strong><?= htmlspecialchars($melhor_dia['dia_pt'] ?? 'N/A') ?></strong>. Bom trabalho!</li>
-                    <?php endif; ?>
-                    <?php if ($produto_campeao_semana): ?>
-                        <li class="insight-item">O produto campeão de vendas nos últimos 7 dias é o <strong><?= htmlspecialchars($produto_campeao_semana ?: 'N/A') ?></strong>. Considere repor o estoque.</li>
-                    <?php endif; ?>
-                    <?php if ($estoque_baixo > 0): ?>
-                        <li class="insight-item" style="color: #EF4444;"><strong>Atenção:</strong> Você tem <strong><?= $estoque_baixo ?></strong> produto(s) com nível de estoque baixo ou zerado.</li>
-                    <?php else: ?>
-                        <li class="insight-item" style="color: #10B981;">Seu controle de estoque está em dia! Nenhum produto com estoque baixo.</li>
-                    <?php endif; ?>
-                </ul>
+            <div class="kpi-pro">
+                <div class="kpi-header">
+                    <span class="kpi-title">Saldo de Caixa (Mês)</span>
+                    <div class="kpi-icon bg-green-light"><i class="fas fa-coins"></i></div>
+                </div>
+                <div class="kpi-value" style="color: <?= $saldo_caixa >= 0 ? '#059669' : '#DC2626' ?>;">
+                    R$ <?= number_format($saldo_caixa, 2, ',', '.') ?>
+                </div>
+                <div style="font-size: 0.8rem; color: #6B7280;">
+                    Compras: R$ <?= number_format($despesas_mes, 2, ',', '.') ?>
+                </div>
+            </div>
+
+            <div class="kpi-pro">
+                <div class="kpi-header">
+                    <span class="kpi-title">Previsão Fechamento</span>
+                    <div class="kpi-icon bg-blue-light"><i class="fas fa-chart-line"></i></div>
+                </div>
+                <div class="kpi-value">R$ <?= number_format($previsao_mes, 2, ',', '.') ?></div>
+                <div style="font-size: 0.8rem; color: #6B7280;">
+                    Baseado na média diária de R$ <?= number_format($dia_atual > 0 ? $faturamento_mes/$dia_atual : 0, 2, ',', '.') ?>
+                </div>
+            </div>
+
+            <div class="kpi-pro">
+                <div class="kpi-header">
+                    <span class="kpi-title">Meta de Vendas</span>
+                    <div class="kpi-icon bg-orange-light"><i class="fas fa-bullseye"></i></div>
+                </div>
+                <div class="goal-container">
+                    <div class="goal-header">
+                        <span><?= number_format($porcentagem_meta, 1) ?>% atingido</span>
+                        <span>Meta: R$ <?= number_format($meta_vendas/1000, 0) ?>k</span>
+                    </div>
+                    <div class="progress-bg">
+                        <div class="progress-fill" style="width: <?= $porcentagem_meta ?>%;"></div>
+                    </div>
+                </div>
             </div>
         </div>
 
-        <div id="chat-launcher">
+        <div class="dashboard-grid" style="display: grid; grid-template-columns: 3fr 1fr; gap: 1.5rem;">
+            
+            <div class="chart-section" style="background: white; padding: 25px; border-radius: 12px; box-shadow: 0 4px 6px rgba(0,0,0,0.05);">
+                <div class="chart-header" style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
+                    <h3 style="font-size: 1.1rem; color: #374151;"><?= $chart_title ?></h3>
+                    <div class="chart-controls" style="background: #F3F4F6; padding: 4px; border-radius: 8px;">
+                        <a href="?periodo=diario" class="chart-btn <?= $periodo == 'diario' ? 'active' : '' ?>" style="padding: 6px 12px; text-decoration: none; color: inherit; font-size: 0.85rem; <?= $periodo == 'diario' ? 'background:white; font-weight:bold; box-shadow:0 2px 4px rgba(0,0,0,0.05); border-radius:6px;' : '' ?>">Diário</a>
+                        <a href="?periodo=semanal" class="chart-btn <?= $periodo == 'semanal' ? 'active' : '' ?>" style="padding: 6px 12px; text-decoration: none; color: inherit; font-size: 0.85rem; <?= $periodo == 'semanal' ? 'background:white; font-weight:bold; box-shadow:0 2px 4px rgba(0,0,0,0.05); border-radius:6px;' : '' ?>">Semanal</a>
+                        <a href="?periodo=mensal" class="chart-btn <?= $periodo == 'mensal' ? 'active' : '' ?>" style="padding: 6px 12px; text-decoration: none; color: inherit; font-size: 0.85rem; <?= $periodo == 'mensal' ? 'background:white; font-weight:bold; box-shadow:0 2px 4px rgba(0,0,0,0.05); border-radius:6px;' : '' ?>">Mensal</a>
+                        <a href="?periodo=anual" class="chart-btn <?= $periodo == 'anual' ? 'active' : '' ?>" style="padding: 6px 12px; text-decoration: none; color: inherit; font-size: 0.85rem; <?= $periodo == 'anual' ? 'background:white; font-weight:bold; box-shadow:0 2px 4px rgba(0,0,0,0.05); border-radius:6px;' : '' ?>">Anual</a>
+                    </div>
+                </div>
+                <div style="height: 350px; width: 100%;">
+                    <canvas id="mainChart"></canvas>
+                </div>
+            </div>
+
+            <div class="side-section" style="display: flex; flex-direction: column; gap: 1.5rem;">
+                
+                <div class="list-card" style="background: white; padding: 20px; border-radius: 12px; box-shadow: 0 4px 6px rgba(0,0,0,0.05); text-align: center;">
+                    <div style="font-size: 0.9rem; color: #6B7280; margin-bottom: 5px;">Ticket Médio</div>
+                    <div style="font-size: 2rem; font-weight: 800; color: #6D28D9;">R$ <?= number_format($ticket_medio, 2, ',', '.') ?></div>
+                    <div style="font-size: 0.8rem; color: #10B981; background: #ECFDF5; display: inline-block; padding: 2px 8px; border-radius: 10px; margin-top: 5px;">
+                        <?= $qtd_vendas_mes ?> vendas este mês
+                    </div>
+                </div>
+
+                <div class="list-card" style="background: white; padding: 20px; border-radius: 12px; box-shadow: 0 4px 6px rgba(0,0,0,0.05);">
+                    <h3 style="margin-bottom: 15px; font-size: 1rem; color: #374151; border-bottom: 1px solid #eee; padding-bottom: 10px;">🏆 Top 5 Produtos</h3>
+                    <ul style="list-style: none; padding: 0;">
+                        <?php if (empty($top_produtos)): ?>
+                            <li style="color: #9CA3AF; text-align: center;">Sem vendas.</li>
+                        <?php else: ?>
+                            <?php foreach ($top_produtos as $prod): ?>
+                                <li style="display: flex; justify-content: space-between; padding: 8px 0; font-size: 0.9rem;">
+                                    <span style="color: #4B5563; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 150px;"><?= htmlspecialchars($prod['nome']) ?></span>
+                                    <strong style="color: #6D28D9;"><?= $prod['qtd'] ?> un</strong>
+                                </li>
+                            <?php endforeach; ?>
+                        <?php endif; ?>
+                    </ul>
+                </div>
+
+                <?php if($estoque_baixo > 0): ?>
+                <a href="estoque.php?filtro=estoque_baixo" style="text-decoration: none;">
+                    <div style="background: #FEF2F2; border: 1px solid #FECACA; padding: 15px; border-radius: 12px; display: flex; align-items: center; gap: 15px; cursor: pointer;">
+                        <div style="background: #FEE2E2; color: #DC2626; width: 40px; height: 40px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 1.2rem;"><i class="fas fa-exclamation-triangle"></i></div>
+                        <div>
+                            <div style="color: #991B1B; font-weight: 700; font-size: 1.1rem;"><?= $estoque_baixo ?> Produtos</div>
+                            <div style="color: #EF4444; font-size: 0.85rem;">Com estoque crítico</div>
+                        </div>
+                    </div>
+                </a>
+                <?php endif; ?>
+            </div>
+        </div>
+
+        <div id="chat-launcher" onclick="document.getElementById('chat-container').classList.remove('hidden')">
             <i class="fas fa-robot"></i>
         </div>
         <div id="chat-container" class="hidden">
             <div class="chat-header">
-                <h3>Converse com Relp! IA</h3>
-                <button id="close-chat"><i class="fas fa-times"></i></button>
+                <h3>Relp! IA</h3>
+                <button id="close-chat" onclick="document.getElementById('chat-container').classList.add('hidden')"><i class="fas fa-times"></i></button>
             </div>
             <div class="chat-messages" id="chat-messages">
                 <div class="message ai">
-                    Olá! Eu sou Relp!, sua assistente de IA. Pergunte-me sobre seus dados, como "Qual o faturamento deste mês?" ou "Qual o produto mais vendido?".
+                    Olá! Seu ticket médio está em R$ <?= number_format($ticket_medio, 2) ?>. Quer dicas para aumentá-lo?
                 </div>
             </div>
             <div class="chat-input-form">
-                <div id="typing-indicator" class="hidden">
-                    <div class="dot"></div>
-                    <div class="dot"></div>
-                    <div class="dot"></div>
-                </div>
                 <form id="ai-chat-form">
-                    <input type="text" id="chat-input" placeholder="Faça uma pergunta..." autocomplete="off">
+                    <input type="text" id="chat-input" placeholder="Pergunte..." autocomplete="off">
                     <button type="submit"><i class="fas fa-paper-plane"></i></button>
                 </form>
             </div>
         </div>
+
     </main>
 
     <script>
-        // Scripts dos gráficos (não precisam ser alterados, pois o PHP entrega os dados limpos)
-        const faturamentoCtx = document.getElementById('faturamentoDiarioChart').getContext('2d');
-        new Chart(faturamentoCtx, {
-            type: 'bar',
+        const ctx = document.getElementById('mainChart').getContext('2d');
+        const gradient = ctx.createLinearGradient(0, 0, 0, 400);
+        gradient.addColorStop(0, 'rgba(109, 40, 217, 0.2)'); 
+        gradient.addColorStop(1, 'rgba(109, 40, 217, 0.0)');
+
+        new Chart(ctx, {
+            type: 'line',
             data: {
-                labels: <?= json_encode($labels_faturamento) ?>,
+                labels: <?= json_encode($labels_grafico) ?>,
                 datasets: [{
-                    label: 'Faturamento (R$)',
-                    data: <?= json_encode($data_faturamento) ?>,
-                    backgroundColor: '#6D28D9',
-                    borderRadius: 5
-                }]
-            },
-            options: {
-                scales: {
-                    y: {
-                        beginAtZero: true
-                    }
-                },
-                responsive: true,
-                maintainAspectRatio: false
-            }
-        });
-        const categoriaCtx = document.getElementById('vendasCategoriaChart').getContext('2d');
-        new Chart(categoriaCtx, {
-            type: 'doughnut',
-            data: {
-                labels: <?= json_encode($labels_categoria) ?>,
-                datasets: [{
-                    label: 'Vendas',
-                    data: <?= json_encode($data_categoria) ?>,
-                    backgroundColor: ['#6D28D9', '#D946EF', '#3B82F6', '#14B8A6', '#F97316', '#A78BFA'],
-                    hoverOffset: 4
+                    label: 'Vendas (R$)',
+                    data: <?= json_encode($data_grafico) ?>,
+                    borderColor: '#7C3AED',
+                    backgroundColor: gradient,
+                    borderWidth: 2,
+                    pointBackgroundColor: '#fff',
+                    pointBorderColor: '#7C3AED',
+                    pointRadius: 4,
+                    pointHoverRadius: 6,
+                    fill: true,
+                    tension: 0.4
                 }]
             },
             options: {
                 responsive: true,
                 maintainAspectRatio: false,
                 plugins: {
-                    legend: {
-                        position: 'bottom'
+                    legend: { display: false },
+                    tooltip: {
+                        backgroundColor: '#1F2937',
+                        padding: 12,
+                        titleFont: { size: 13 },
+                        bodyFont: { size: 14, weight: 'bold' },
+                        callbacks: {
+                            label: function(context) {
+                                return 'R$ ' + new Intl.NumberFormat('pt-BR', { minimumFractionDigits: 2 }).format(context.parsed.y);
+                            }
+                        }
+                    }
+                },
+                scales: {
+                    y: {
+                        beginAtZero: true,
+                        grid: { borderDash: [4, 4], color: '#F3F4F6' },
+                        ticks: { callback: function(val) { return 'R$ ' + val/1000 + 'k'; }, color: '#9CA3AF' }
+                    },
+                    x: {
+                        grid: { display: false },
+                        ticks: { color: '#6B7280' }
                     }
                 }
             }
@@ -341,5 +407,4 @@ $produto_campeao_semana = $insight_produto_campeao_stmt->fetchColumn();
     <script src="notificacoes.js"></script>
     <script src="notificacoes_fornecedor.js"></script>
 </body>
-
 </html>
