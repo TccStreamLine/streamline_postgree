@@ -8,7 +8,7 @@ if (empty($_SESSION['id'])) {
 }
 
 $pagina_ativa = 'dashboard';
-$titulo_header = 'Dashboard';
+$titulo_header = 'Dashboard Executivo';
 $usuario_id = $_SESSION['id'];
 $periodo = $_GET['periodo'] ?? 'diario'; 
 
@@ -19,7 +19,7 @@ $periodo = $_GET['periodo'] ?? 'diario';
 // Busca Meta do Usuário
 $stmt_meta = $pdo->prepare("SELECT meta_mensal FROM usuarios WHERE id = ?");
 $stmt_meta->execute([$usuario_id]);
-$meta_vendas = $stmt_meta->fetchColumn() ?: 50000; // Padrão 50k se der erro
+$meta_vendas = $stmt_meta->fetchColumn() ?: 50000;
 
 // Faturamento e Lucro (Mês Atual)
 $kpi_sql = "
@@ -43,7 +43,7 @@ $faturamento_mes = $dados_mes['faturamento'] ?? 0;
 $lucro_mes = $dados_mes['lucro_estimado'] ?? 0;
 $qtd_vendas_mes = $dados_mes['qtd_vendas'] ?? 0;
 $ticket_medio = ($qtd_vendas_mes > 0) ? ($faturamento_mes / $qtd_vendas_mes) : 0;
-$porcentagem_meta = min(100, ($faturamento_mes / $meta_vendas) * 100);
+$porcentagem_meta = ($meta_vendas > 0) ? min(100, ($faturamento_mes / $meta_vendas) * 100) : 0;
 
 // =============================================================
 // 2. GRÁFICO PRINCIPAL (EVOLUÇÃO)
@@ -72,7 +72,7 @@ $res = $stmt->fetchAll(PDO::FETCH_ASSOC);
 foreach ($res as $r) { $labels_grafico[] = $r['label']; $data_grafico[] = $r['total']; }
 
 // =============================================================
-// 3. GRÁFICO DE CATEGORIAS (VOLTOU!)
+// 3. GRÁFICO DE CATEGORIAS
 // =============================================================
 $sql_cat = "SELECT c.nome, COUNT(vi.id) as total FROM venda_itens vi JOIN produtos p ON vi.produto_id = p.id JOIN categorias c ON p.categoria_id = c.id JOIN vendas v ON vi.venda_id = v.id WHERE v.usuario_id = ? AND v.status = 'finalizada' GROUP BY c.nome ORDER BY total DESC LIMIT 5";
 $stmt_cat = $pdo->prepare($sql_cat);
@@ -82,7 +82,7 @@ $labels_cat = array_column($cats, 'nome');
 $data_cat = array_column($cats, 'total');
 
 // =============================================================
-// 4. PRODUTOS ESTOQUE BAIXO (VOLTOU!)
+// 4. PRODUTOS ESTOQUE BAIXO
 // =============================================================
 $sql_baixo = "SELECT nome, quantidade_estoque, quantidade_minima FROM produtos WHERE usuario_id = ? AND quantidade_estoque <= quantidade_minima AND status = 'ativo' ORDER BY quantidade_estoque ASC LIMIT 5";
 $stmt_baixo = $pdo->prepare($sql_baixo);
@@ -104,34 +104,26 @@ $total_baixo = count($estoque_baixo_lista);
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
     
     <style>
-        /* LAYOUT FULL WIDTH PARA MONITORES GRANDES */
-        .main-content {
-            max-width: 100% !important; /* Força largura total */
-            padding: 2rem;
-        }
+        /* CSS EMBUTIDO PARA GARANTIR FUNCIONAMENTO IMEDIATO */
+        .main-content { max-width: 100% !important; padding: 2rem; }
         
         .dashboard-grid-top {
             display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); /* Responsivo inteligente */
+            grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
             gap: 1.5rem;
             margin-bottom: 2rem;
         }
 
         .kpi-card-pro {
-            background: white;
-            padding: 25px;
-            border-radius: 16px;
-            box-shadow: 0 4px 20px rgba(0,0,0,0.04);
-            position: relative;
-            transition: transform 0.3s ease;
-            border: 1px solid #F3F4F6;
+            background: white; padding: 25px; border-radius: 16px;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.04); position: relative;
+            transition: transform 0.3s ease; border: 1px solid #F3F4F6;
         }
         .kpi-card-pro:hover { transform: translateY(-5px); border-color: #DDD6FE; }
         
         .kpi-icon {
-            position: absolute; top: 20px; right: 20px;
-            width: 50px; height: 50px; border-radius: 12px;
-            display: flex; align-items: center; justify-content: center;
+            position: absolute; top: 20px; right: 20px; width: 50px; height: 50px;
+            border-radius: 12px; display: flex; align-items: center; justify-content: center;
             font-size: 1.5rem; opacity: 0.2;
         }
         
@@ -139,47 +131,44 @@ $total_baixo = count($estoque_baixo_lista);
         .kpi-value { font-size: 2rem; font-weight: 800; color: #1F2937; margin: 10px 0; }
         .kpi-sub { font-size: 0.85rem; display: flex; align-items: center; gap: 5px; }
         
-        /* Cores Temáticas */
         .theme-purple .kpi-icon { background: #7C3AED; color: #7C3AED; opacity: 0.15; }
         .theme-purple .kpi-value { color: #7C3AED; }
-        
         .theme-green .kpi-icon { background: #10B981; color: #10B981; opacity: 0.15; }
         .theme-green .kpi-value { color: #059669; }
-        
         .theme-blue .kpi-icon { background: #3B82F6; color: #3B82F6; opacity: 0.15; }
         
-        /* Grid Inferior - Layout 2 colunas grandes */
-        .dashboard-grid-main {
-            display: grid;
-            grid-template-columns: 2fr 1fr; /* Gráfico maior, lateral menor */
-            gap: 1.5rem;
-        }
+        .dashboard-grid-main { display: grid; grid-template-columns: 2fr 1fr; gap: 1.5rem; }
         
         .chart-box {
-            background: white; padding: 25px;
-            border-radius: 16px;
-            box-shadow: 0 4px 20px rgba(0,0,0,0.04);
-            height: 100%;
+            background: white; padding: 25px; border-radius: 16px;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.04); height: 100%;
         }
         
-        .chart-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; }
+        .chart-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; flex-wrap: wrap; gap: 10px; }
         
+        /* Botões de Período e Tipo */
+        .chart-controls-group {
+            background: #F3F4F6; padding: 4px; border-radius: 8px; display: flex; gap: 2px;
+        }
         .periodo-btn {
-            padding: 6px 12px; border-radius: 8px; text-decoration: none;
-            color: #6B7280; font-size: 0.85rem; font-weight: 600;
-            transition: all 0.2s;
+            padding: 6px 12px; border-radius: 6px; text-decoration: none;
+            color: #6B7280; font-size: 0.85rem; font-weight: 600; border: none; cursor: pointer; transition: all 0.2s;
         }
-        .periodo-btn:hover { background: #F3F4F6; color: #1F2937; }
-        .periodo-btn.active { background: #7C3AED; color: white; box-shadow: 0 4px 10px rgba(124, 58, 237, 0.3); }
+        .periodo-btn:hover { background: #E5E7EB; color: #1F2937; }
+        .periodo-btn.active { background: #fff; color: #7C3AED; box-shadow: 0 2px 4px rgba(0,0,0,0.05); }
 
-        /* Barra de Meta */
+        .type-btn {
+            padding: 6px 10px; border-radius: 6px; border: none; cursor: pointer; color: #6B7280; font-size: 1rem;
+        }
+        .type-btn:hover { color: #7C3AED; }
+        .type-btn.active { background: white; color: #7C3AED; box-shadow: 0 2px 4px rgba(0,0,0,0.05); }
+
         .meta-container { margin-top: 15px; }
         .meta-bar-bg { background: #E5E7EB; height: 8px; border-radius: 4px; overflow: hidden; }
         .meta-bar-fill { height: 100%; background: linear-gradient(90deg, #7C3AED, #C084FC); border-radius: 4px; transition: width 1s ease-out; }
         .edit-meta { cursor: pointer; color: #9CA3AF; font-size: 0.8rem; margin-left: 5px; }
         .edit-meta:hover { color: #7C3AED; }
 
-        /* Tabela Estoque Baixo */
         .stock-table { width: 100%; border-collapse: collapse; margin-top: 10px; }
         .stock-table td { padding: 10px 0; border-bottom: 1px solid #F3F4F6; color: #4B5563; font-size: 0.9rem; }
         .stock-badge { background: #FEE2E2; color: #DC2626; padding: 3px 8px; border-radius: 12px; font-size: 0.75rem; font-weight: 700; }
@@ -252,11 +241,19 @@ $total_baixo = count($estoque_baixo_lista);
             <div class="chart-box">
                 <div class="chart-header">
                     <h3 style="color: #374151; font-size: 1.1rem;"><?= $chart_title ?></h3>
-                    <div style="background: #F9FAFB; padding: 5px; border-radius: 10px;">
-                        <a href="?periodo=diario" class="periodo-btn <?= $periodo == 'diario' ? 'active' : '' ?>">Dia</a>
-                        <a href="?periodo=semanal" class="periodo-btn <?= $periodo == 'semanal' ? 'active' : '' ?>">Sem</a>
-                        <a href="?periodo=mensal" class="periodo-btn <?= $periodo == 'mensal' ? 'active' : '' ?>">Mês</a>
-                        <a href="?periodo=anual" class="periodo-btn <?= $periodo == 'anual' ? 'active' : '' ?>">Ano</a>
+                    
+                    <div style="display: flex; gap: 15px;">
+                        <div class="chart-controls-group">
+                            <button class="type-btn active" onclick="mudarTipoGrafico('line')" id="btn-line" title="Linha"><i class="fas fa-chart-line"></i></button>
+                            <button class="type-btn" onclick="mudarTipoGrafico('bar')" id="btn-bar" title="Barras"><i class="fas fa-chart-bar"></i></button>
+                        </div>
+
+                        <div class="chart-controls-group">
+                            <a href="?periodo=diario" class="periodo-btn <?= $periodo == 'diario' ? 'active' : '' ?>">Dia</a>
+                            <a href="?periodo=semanal" class="periodo-btn <?= $periodo == 'semanal' ? 'active' : '' ?>">Sem</a>
+                            <a href="?periodo=mensal" class="periodo-btn <?= $periodo == 'mensal' ? 'active' : '' ?>">Mês</a>
+                            <a href="?periodo=anual" class="periodo-btn <?= $periodo == 'anual' ? 'active' : '' ?>">Ano</a>
+                        </div>
                     </div>
                 </div>
                 <div style="height: 350px; width: 100%;">
@@ -291,14 +288,33 @@ $total_baixo = count($estoque_baixo_lista);
                     <a href="estoque.php?filtro=estoque_baixo" style="display: block; text-align: center; margin-top: 10px; color: #DC2626; font-size: 0.8rem; font-weight: 600;">Ver todos &rarr;</a>
                 </div>
                 <?php endif; ?>
+            </div>
+        </div>
 
+        <div id="chat-launcher" onclick="document.getElementById('chat-container').classList.remove('hidden')">
+            <i class="fas fa-robot"></i>
+        </div>
+        <div id="chat-container" class="hidden">
+            <div class="chat-header">
+                <h3>Relp! IA</h3>
+                <button id="close-chat" onclick="document.getElementById('chat-container').classList.add('hidden')"><i class="fas fa-times"></i></button>
+            </div>
+            <div class="chat-messages" id="chat-messages">
+                <div class="message ai">
+                    Olá! Seu ticket médio está em R$ <?= number_format($ticket_medio, 2) ?>. Quer dicas para aumentá-lo?
+                </div>
+            </div>
+            <div class="chat-input-form">
+                <form id="ai-chat-form">
+                    <input type="text" id="chat-input" placeholder="Pergunte..." autocomplete="off">
+                    <button type="submit"><i class="fas fa-paper-plane"></i></button>
+                </form>
             </div>
         </div>
 
     </main>
 
     <script>
-        // Função para Editar Meta
         function editarMeta() {
             Swal.fire({
                 title: 'Definir Meta Mensal',
@@ -309,64 +325,75 @@ $total_baixo = count($estoque_baixo_lista);
                 confirmButtonText: 'Salvar',
                 confirmButtonColor: '#7C3AED',
                 preConfirm: (valor) => {
-                    if (!valor || valor <= 0) {
-                        Swal.showValidationMessage('Digite um valor válido');
-                    }
+                    if (!valor || valor <= 0) { Swal.showValidationMessage('Digite um valor válido'); }
                     return valor;
                 }
             }).then((result) => {
                 if (result.isConfirmed) {
-                    // Envia via AJAX para salvar_meta.php
                     const formData = new FormData();
                     formData.append('meta', result.value);
-                    
                     fetch('salvar_meta.php', { method: 'POST', body: formData })
                     .then(r => r.text())
                     .then(resp => {
-                        if(resp.trim() === 'sucesso') {
-                            Swal.fire('Atualizado!', 'Sua meta foi definida.', 'success').then(() => location.reload());
-                        } else {
-                            Swal.fire('Erro', 'Não foi possível salvar.', 'error');
-                        }
+                        if(resp.trim() === 'sucesso') { Swal.fire('Atualizado!', 'Sua meta foi definida.', 'success').then(() => location.reload()); } 
+                        else { Swal.fire('Erro', 'Não foi possível salvar.', 'error'); }
                     });
                 }
             });
         }
 
-        // Gráfico Principal (Financeiro)
         const ctx = document.getElementById('mainChart').getContext('2d');
-        const gradient = ctx.createLinearGradient(0, 0, 0, 400);
-        gradient.addColorStop(0, 'rgba(124, 58, 237, 0.2)'); 
-        gradient.addColorStop(1, 'rgba(124, 58, 237, 0.0)');
+        let mainChart; 
+        const labels = <?= json_encode($labels_grafico) ?>;
+        const dataValues = <?= json_encode($data_grafico) ?>;
 
-        new Chart(ctx, {
-            type: 'line',
-            data: {
-                labels: <?= json_encode($labels_grafico) ?>,
-                datasets: [{
-                    label: 'Vendas (R$)',
-                    data: <?= json_encode($data_grafico) ?>,
-                    borderColor: '#7C3AED',
-                    backgroundColor: gradient,
-                    borderWidth: 2,
-                    pointBackgroundColor: '#fff',
-                    pointBorderColor: '#7C3AED',
-                    fill: true,
-                    tension: 0.4
-                }]
-            },
-            options: {
-                responsive: true,
-                maintainAspectRatio: false,
-                plugins: { legend: { display: false } },
-                scales: { 
-                    y: { beginAtZero: true, grid: { borderDash: [4, 4] } },
-                    x: { grid: { display: false } }
+        function getGradient() {
+            const g = ctx.createLinearGradient(0, 0, 0, 400);
+            g.addColorStop(0, 'rgba(124, 58, 237, 0.2)'); 
+            g.addColorStop(1, 'rgba(124, 58, 237, 0.0)');
+            return g;
+        }
+
+        function renderMainChart(type) {
+            if (mainChart) mainChart.destroy();
+            const config = {
+                type: type,
+                data: {
+                    labels: labels,
+                    datasets: [{
+                        label: 'Vendas (R$)',
+                        data: dataValues,
+                        borderColor: '#7C3AED',
+                        backgroundColor: type === 'line' ? getGradient() : '#7C3AED',
+                        borderWidth: 2,
+                        pointBackgroundColor: '#fff',
+                        pointBorderColor: '#7C3AED',
+                        fill: true,
+                        tension: 0.4,
+                        borderRadius: type === 'bar' ? 5 : 0
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: { legend: { display: false } },
+                    scales: { 
+                        y: { beginAtZero: true, grid: { borderDash: [4, 4] }, ticks: { callback: function(val) { return 'R$ ' + val; } } },
+                        x: { grid: { display: false } }
+                    }
                 }
-            }
-        });
+            };
+            mainChart = new Chart(ctx, config);
+        }
 
-        // Gráfico Categorias (Rosca)
+        renderMainChart('line');
+
+        function mudarTipoGrafico(type) {
+            document.querySelectorAll('.type-btn').forEach(btn => btn.classList.remove('active'));
+            document.getElementById('btn-' + type).classList.add('active');
+            renderMainChart(type);
+        }
+
         <?php if (!empty($labels_cat)): ?>
         const ctxCat = document.getElementById('catChart').getContext('2d');
         new Chart(ctxCat, {
@@ -382,14 +409,13 @@ $total_baixo = count($estoque_baixo_lista);
             options: {
                 responsive: true,
                 maintainAspectRatio: false,
-                plugins: { 
-                    legend: { position: 'right', labels: { boxWidth: 12, font: { size: 10 } } } 
-                }
+                plugins: { legend: { position: 'right', labels: { boxWidth: 12, font: { size: 10 } } } }
             }
         });
         <?php endif; ?>
     </script>
     
+    <script src="dashboard_chat.js"></script>
     <script src="main.js"></script>
     <script src="notificacoes.js"></script>
     <script src="notificacoes_fornecedor.js"></script>
