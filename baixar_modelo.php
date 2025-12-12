@@ -1,37 +1,34 @@
 <?php
-
 header('Content-Type: text/csv; charset=utf-8');
-header('Content-Disposition: attachment; filename=modelo_importacao_produtos.csv');
-
+header('Content-Disposition: attachment; filename=modelo_importacao_completo.csv');
 
 $output = fopen('php://output', 'w');
-
-
-fprintf($output, chr(0xEF).chr(0xBB).chr(0xBF));
-
+fprintf($output, chr(0xEF).chr(0xBB).chr(0xBF)); 
 
 $cabecalho = [
     'Codigo de Barras', 
     'Nome do Produto', 
-    'Estoque Atual', 
-    'Estoque Minimo', 
-    'Valor Compra (R$)', 
-    'Valor Venda (R$)', 
-    'Descricao/Especificacao'
+    'Estoque', 
+    'Minimo', 
+    'Custo (R$)', 
+    'Venda (R$)', 
+    'Descricao',
+    'Categoria (Nome)',   
+    'Fornecedor (Nome)'   
 ];
-
 
 fputcsv($output, $cabecalho, ';');
 
-
 $exemplo = [
-    '7891234567890', 
-    'Exemplo: Detergente Neutro 500ml', 
+    '789123456', 
+    'Detergente Neutro 500ml', 
     '100', 
     '20', 
     '1,50', 
     '3,00', 
-    'Detergente marca Ype'
+    'Produto de Limpeza',
+    'Limpeza',            
+    'Atacadão XYZ'        
 ];
 fputcsv($output, $exemplo, ';');
 
