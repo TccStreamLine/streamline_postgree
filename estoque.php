@@ -47,9 +47,6 @@ $nome_empresa = $_SESSION['nome_empresa'] ?? 'Empresa';
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title><?= htmlspecialchars($titulo_header) ?> - Sistema de Gerenciamento</title>
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <link rel="stylesheet" href="css/sistema.css">
     <link rel="stylesheet" href="css/estoque.css">
@@ -77,6 +74,11 @@ $nome_empresa = $_SESSION['nome_empresa'] ?? 'Empresa';
             </div>
             <div class="actions-buttons">
                 <a href="categorias.php" class="btn-secondary">Gerenciar Categorias</a>
+                
+                <a href="importar_produtos.php" class="btn-secondary" style="background-color: #10B981; color: white; border: none;">
+                    <i class="fas fa-file-csv"></i> Importar Excel/CSV
+                </a>
+
                 <a href="produto_formulario.php" class="btn-primary">
                     <i class="fas fa-plus"></i> Cadastrar Produto
                 </a>
