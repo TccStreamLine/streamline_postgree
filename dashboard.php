@@ -121,7 +121,7 @@ $total_baixo = count($estoque_baixo_lista);
         .main-content {
             max-width: 100% !important;
             padding: 2rem 3rem;
-            background-color: #FAFAFA; /* Fundo geral mais suave */
+            background-color: #FAFAFA;
         }
         
         /* Grid de KPIs */
@@ -136,7 +136,7 @@ $total_baixo = count($estoque_baixo_lista);
             background: var(--bg-card);
             padding: 24px;
             border-radius: 16px;
-            box-shadow: 0 2px 10px rgba(0,0,0,0.03); /* Sombra mais suave */
+            box-shadow: 0 2px 10px rgba(0,0,0,0.03);
             position: relative;
             border: 1px solid var(--border-light);
             transition: transform 0.2s, box-shadow 0.2s;
@@ -199,7 +199,7 @@ $total_baixo = count($estoque_baixo_lista);
         /* Layout Principal */
         .dashboard-grid-main {
             display: grid;
-            grid-template-columns: 2.5fr 1fr; /* Gráfico bem maior */
+            grid-template-columns: 2.5fr 1fr;
             gap: 1.5rem;
         }
         
@@ -283,7 +283,6 @@ $total_baixo = count($estoque_baixo_lista);
             font-size: 0.75rem; font-weight: 700; 
         }
 
-        /* Responsividade */
         @media (max-width: 1024px) { .dashboard-grid-main { grid-template-columns: 1fr; } }
     </style>
 </head>
@@ -475,10 +474,14 @@ $total_baixo = count($estoque_baixo_lista);
                         borderWidth: 2,
                         borderRadius: type === 'bar' ? 6 : 0, // Arredondado se for barra
                         barPercentage: 0.6, // Barras não muito grossas
-                        pointRadius: 0, // Remove bolinhas (limpo)
-                        pointHoverRadius: 6, // Bolinha aparece só no hover
+                        
+                        // CONFIGURAÇÃO DAS BOLINHAS (CORRIGIDO PARA APARECER SEMPRE)
+                        pointRadius: 4, 
+                        pointHoverRadius: 6,
                         pointBackgroundColor: '#fff',
                         pointBorderColor: '#7C3AED',
+                        pointBorderWidth: 2,
+                        
                         fill: true,
                         tension: 0.4 // Curva suave (spline)
                     }]
@@ -547,7 +550,7 @@ $total_baixo = count($estoque_baixo_lista);
             options: {
                 responsive: true,
                 maintainAspectRatio: false,
-                cutout: '75%', // Rosca mais fina (moderno)
+                cutout: '50%', // Rosca mais grossa (antes era 75%)
                 plugins: { 
                     legend: { position: 'right', labels: { boxWidth: 10, usePointStyle: true, font: { size: 11 } } } 
                 }
