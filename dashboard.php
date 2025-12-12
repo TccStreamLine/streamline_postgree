@@ -8,7 +8,7 @@ if (empty($_SESSION['id'])) {
 }
 
 $pagina_ativa = 'dashboard';
-$titulo_header = 'Dashboard Executivo';
+$titulo_header = 'Visão Geral';
 $usuario_id = $_SESSION['id'];
 $periodo = $_GET['periodo'] ?? 'diario'; 
 
@@ -46,7 +46,7 @@ $ticket_medio = ($qtd_vendas_mes > 0) ? ($faturamento_mes / $qtd_vendas_mes) : 0
 $porcentagem_meta = ($meta_vendas > 0) ? min(100, ($faturamento_mes / $meta_vendas) * 100) : 0;
 
 // =============================================================
-// 2. GRÁFICO PRINCIPAL (EVOLUÇÃO)
+// 2. DADOS DO GRÁFICO PRINCIPAL
 // =============================================================
 $labels_grafico = [];
 $data_grafico = [];
@@ -57,10 +57,10 @@ if ($periodo == 'diario') {
     $sql = "SELECT to_char(data_venda, 'DD/MM') as label, SUM(valor_total) as total FROM vendas WHERE usuario_id = ? AND data_venda >= CURRENT_DATE - INTERVAL '6 days' AND status = 'finalizada' GROUP BY 1, data_venda::DATE ORDER BY data_venda::DATE ASC";
 } elseif ($periodo == 'semanal') {
     $chart_title = "Vendas Semanais (8 Semanas)";
-    $sql = "SELECT 'Semana ' || EXTRACT(WEEK FROM data_venda) as label, SUM(valor_total) as total, MIN(data_venda) as d FROM vendas WHERE usuario_id = ? AND data_venda >= CURRENT_DATE - INTERVAL '8 weeks' AND status = 'finalizada' GROUP BY EXTRACT(WEEK FROM data_venda) ORDER BY d ASC";
+    $sql = "SELECT 'Sem ' || EXTRACT(WEEK FROM data_venda) as label, SUM(valor_total) as total, MIN(data_venda) as d FROM vendas WHERE usuario_id = ? AND data_venda >= CURRENT_DATE - INTERVAL '8 weeks' AND status = 'finalizada' GROUP BY EXTRACT(WEEK FROM data_venda) ORDER BY d ASC";
 } elseif ($periodo == 'mensal') {
-    $chart_title = "Vendas Mensais (1 Ano)";
-    $sql = "SELECT to_char(data_venda, 'MM/YYYY') as label, SUM(valor_total) as total, date_trunc('month', data_venda) as d FROM vendas WHERE usuario_id = ? AND data_venda >= CURRENT_DATE - INTERVAL '12 months' AND status = 'finalizada' GROUP BY 1, d ORDER BY d ASC";
+    $chart_title = "Vendas Mensais (Último Ano)";
+    $sql = "SELECT to_char(data_venda, 'MM/YY') as label, SUM(valor_total) as total, date_trunc('month', data_venda) as d FROM vendas WHERE usuario_id = ? AND data_venda >= CURRENT_DATE - INTERVAL '12 months' AND status = 'finalizada' GROUP BY 1, d ORDER BY d ASC";
 } else { 
     $chart_title = "Vendas Anuais";
     $sql = "SELECT EXTRACT(YEAR FROM data_venda)::TEXT as label, SUM(valor_total) as total FROM vendas WHERE usuario_id = ? AND status = 'finalizada' GROUP BY 1 ORDER BY 1 ASC";
@@ -82,7 +82,7 @@ $labels_cat = array_column($cats, 'nome');
 $data_cat = array_column($cats, 'total');
 
 // =============================================================
-// 4. PRODUTOS ESTOQUE BAIXO
+// 4. ESTOQUE BAIXO
 // =============================================================
 $sql_baixo = "SELECT nome, quantidade_estoque, quantidade_minima FROM produtos WHERE usuario_id = ? AND quantidade_estoque <= quantidade_minima AND status = 'ativo' ORDER BY quantidade_estoque ASC LIMIT 5";
 $stmt_baixo = $pdo->prepare($sql_baixo);
@@ -104,75 +104,186 @@ $total_baixo = count($estoque_baixo_lista);
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
     
     <style>
-        /* CSS EMBUTIDO PARA GARANTIR FUNCIONAMENTO IMEDIATO */
-        .main-content { max-width: 100% !important; padding: 2rem; }
+        /* ========================
+           DESIGN SYSTEM (UI/UX)
+           ======================== */
+        :root {
+            --primary-color: #6D28D9;
+            --primary-light: #F3E8FF;
+            --text-dark: #1F2937;
+            --text-gray: #6B7280;
+            --bg-card: #FFFFFF;
+            --border-light: #F3F4F6;
+            --success: #10B981;
+            --danger: #EF4444;
+        }
+
+        .main-content {
+            max-width: 100% !important;
+            padding: 2rem 3rem;
+            background-color: #FAFAFA; /* Fundo geral mais suave */
+        }
         
+        /* Grid de KPIs */
         .dashboard-grid-top {
             display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+            grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
             gap: 1.5rem;
             margin-bottom: 2rem;
         }
 
         .kpi-card-pro {
-            background: white; padding: 25px; border-radius: 16px;
-            box-shadow: 0 4px 20px rgba(0,0,0,0.04); position: relative;
-            transition: transform 0.3s ease; border: 1px solid #F3F4F6;
+            background: var(--bg-card);
+            padding: 24px;
+            border-radius: 16px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.03); /* Sombra mais suave */
+            position: relative;
+            border: 1px solid var(--border-light);
+            transition: transform 0.2s, box-shadow 0.2s;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+            height: 160px;
         }
-        .kpi-card-pro:hover { transform: translateY(-5px); border-color: #DDD6FE; }
         
+        .kpi-card-pro:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 8px 20px rgba(0,0,0,0.06);
+        }
+        
+        .kpi-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+        }
+
         .kpi-icon {
-            position: absolute; top: 20px; right: 20px; width: 50px; height: 50px;
-            border-radius: 12px; display: flex; align-items: center; justify-content: center;
-            font-size: 1.5rem; opacity: 0.2;
+            width: 48px; height: 48px;
+            border-radius: 12px;
+            display: flex; align-items: center; justify-content: center;
+            font-size: 1.4rem;
         }
         
-        .kpi-label { font-size: 0.9rem; color: #6B7280; font-weight: 600; text-transform: uppercase; letter-spacing: 0.5px; }
-        .kpi-value { font-size: 2rem; font-weight: 800; color: #1F2937; margin: 10px 0; }
-        .kpi-sub { font-size: 0.85rem; display: flex; align-items: center; gap: 5px; }
-        
-        .theme-purple .kpi-icon { background: #7C3AED; color: #7C3AED; opacity: 0.15; }
-        .theme-purple .kpi-value { color: #7C3AED; }
-        .theme-green .kpi-icon { background: #10B981; color: #10B981; opacity: 0.15; }
-        .theme-green .kpi-value { color: #059669; }
-        .theme-blue .kpi-icon { background: #3B82F6; color: #3B82F6; opacity: 0.15; }
-        
-        .dashboard-grid-main { display: grid; grid-template-columns: 2fr 1fr; gap: 1.5rem; }
-        
-        .chart-box {
-            background: white; padding: 25px; border-radius: 16px;
-            box-shadow: 0 4px 20px rgba(0,0,0,0.04); height: 100%;
+        .kpi-label {
+            font-size: 0.85rem;
+            color: var(--text-gray);
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            margin-top: 5px;
         }
         
-        .chart-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; flex-wrap: wrap; gap: 10px; }
+        .kpi-value {
+            font-size: 2rem;
+            font-weight: 800;
+            color: var(--text-dark);
+            margin: 5px 0 0 0;
+            letter-spacing: -0.5px;
+        }
         
-        /* Botões de Período e Tipo */
-        .chart-controls-group {
-            background: #F3F4F6; padding: 4px; border-radius: 8px; display: flex; gap: 2px;
+        .kpi-sub {
+            font-size: 0.85rem;
+            color: var(--text-gray);
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            margin-top: auto;
         }
-        .periodo-btn {
-            padding: 6px 12px; border-radius: 6px; text-decoration: none;
-            color: #6B7280; font-size: 0.85rem; font-weight: 600; border: none; cursor: pointer; transition: all 0.2s;
+        
+        /* Temas de Cores */
+        .theme-purple .kpi-icon { background: #F5F3FF; color: #7C3AED; }
+        .theme-green .kpi-icon { background: #ECFDF5; color: #059669; }
+        .theme-blue .kpi-icon { background: #EFF6FF; color: #2563EB; }
+        .theme-red .kpi-icon { background: #FEF2F2; color: #DC2626; }
+        
+        /* Layout Principal */
+        .dashboard-grid-main {
+            display: grid;
+            grid-template-columns: 2.5fr 1fr; /* Gráfico bem maior */
+            gap: 1.5rem;
         }
-        .periodo-btn:hover { background: #E5E7EB; color: #1F2937; }
-        .periodo-btn.active { background: #fff; color: #7C3AED; box-shadow: 0 2px 4px rgba(0,0,0,0.05); }
+        
+        .card-box {
+            background: var(--bg-card);
+            padding: 25px;
+            border-radius: 16px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.03);
+            border: 1px solid var(--border-light);
+            height: 100%;
+        }
+        
+        .card-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 25px;
+        }
+        
+        .card-title {
+            font-size: 1.1rem;
+            font-weight: 700;
+            color: var(--text-dark);
+        }
+        
+        /* Botões de Controle do Gráfico */
+        .chart-controls {
+            background: #F3F4F6;
+            padding: 4px;
+            border-radius: 10px;
+            display: flex;
+            gap: 4px;
+        }
+        
+        .control-btn {
+            border: none;
+            background: transparent;
+            padding: 6px 14px;
+            border-radius: 8px;
+            font-size: 0.8rem;
+            font-weight: 600;
+            color: var(--text-gray);
+            cursor: pointer;
+            transition: all 0.2s;
+            text-decoration: none;
+            display: inline-block;
+        }
+        
+        .control-btn:hover { color: var(--text-dark); background: rgba(255,255,255,0.5); }
+        
+        .control-btn.active {
+            background: white;
+            color: var(--primary-color);
+            box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+        }
 
-        .type-btn {
-            padding: 6px 10px; border-radius: 6px; border: none; cursor: pointer; color: #6B7280; font-size: 1rem;
+        .icon-btn {
+            padding: 6px 10px;
+            font-size: 1rem;
         }
-        .type-btn:hover { color: #7C3AED; }
-        .type-btn.active { background: white; color: #7C3AED; box-shadow: 0 2px 4px rgba(0,0,0,0.05); }
 
-        .meta-container { margin-top: 15px; }
-        .meta-bar-bg { background: #E5E7EB; height: 8px; border-radius: 4px; overflow: hidden; }
-        .meta-bar-fill { height: 100%; background: linear-gradient(90deg, #7C3AED, #C084FC); border-radius: 4px; transition: width 1s ease-out; }
-        .edit-meta { cursor: pointer; color: #9CA3AF; font-size: 0.8rem; margin-left: 5px; }
-        .edit-meta:hover { color: #7C3AED; }
+        /* Barra de Meta */
+        .meta-wrapper { width: 100%; margin-top: auto; }
+        .meta-info { display: flex; justify-content: space-between; font-size: 0.75rem; color: var(--text-gray); margin-bottom: 5px; }
+        .meta-track { width: 100%; height: 6px; background: #E5E7EB; border-radius: 3px; overflow: hidden; }
+        .meta-fill { height: 100%; background: linear-gradient(90deg, #8B5CF6, #D8B4FE); border-radius: 3px; }
+        
+        .edit-btn { 
+            background: none; border: none; cursor: pointer; color: #9CA3AF; 
+            font-size: 0.9rem; margin-left: 8px; transition: color 0.2s; 
+        }
+        .edit-btn:hover { color: var(--primary-color); }
 
+        /* Tabela Estoque */
         .stock-table { width: 100%; border-collapse: collapse; margin-top: 10px; }
-        .stock-table td { padding: 10px 0; border-bottom: 1px solid #F3F4F6; color: #4B5563; font-size: 0.9rem; }
-        .stock-badge { background: #FEE2E2; color: #DC2626; padding: 3px 8px; border-radius: 12px; font-size: 0.75rem; font-weight: 700; }
+        .stock-table tr:last-child td { border-bottom: none; }
+        .stock-table td { padding: 12px 0; border-bottom: 1px solid #F3F4F6; color: var(--text-dark); font-size: 0.9rem; }
+        .stock-badge { 
+            background: #FEF2F2; color: #DC2626; 
+            padding: 4px 10px; border-radius: 20px; 
+            font-size: 0.75rem; font-weight: 700; 
+        }
 
+        /* Responsividade */
         @media (max-width: 1024px) { .dashboard-grid-main { grid-template-columns: 1fr; } }
     </style>
 </head>
@@ -186,94 +297,104 @@ $total_baixo = count($estoque_baixo_lista);
         <div class="dashboard-grid-top">
             
             <div class="kpi-card-pro theme-purple">
-                <div class="kpi-icon"><i class="fas fa-wallet"></i></div>
-                <div class="kpi-label">
-                    Faturamento Mês 
-                    <i class="fas fa-pencil-alt edit-meta" onclick="editarMeta()" title="Alterar Meta de Vendas"></i>
+                <div class="kpi-header">
+                    <span class="kpi-label">
+                        Faturamento Mês
+                        <button class="edit-btn" onclick="editarMeta()" title="Editar Meta"><i class="fas fa-pen"></i></button>
+                    </span>
+                    <div class="kpi-icon"><i class="fas fa-wallet"></i></div>
                 </div>
                 <div class="kpi-value">R$ <?= number_format($faturamento_mes, 2, ',', '.') ?></div>
                 
-                <div class="meta-container">
-                    <div style="display:flex; justify-content:space-between; font-size:0.75rem; color:#6B7280; margin-bottom:4px;">
-                        <span><?= number_format($porcentagem_meta, 0) ?>% da Meta</span>
-                        <span>Alvo: R$ <?= number_format($meta_vendas/1000, 0) ?>k</span>
+                <div class="meta-wrapper">
+                    <div class="meta-info">
+                        <span><strong><?= number_format($porcentagem_meta, 0) ?>%</strong> da meta</span>
+                        <span>Alvo: <?= number_format($meta_vendas/1000, 0) ?>k</span>
                     </div>
-                    <div class="meta-bar-bg">
-                        <div class="meta-bar-fill" style="width: <?= $porcentagem_meta ?>%;"></div>
+                    <div class="meta-track">
+                        <div class="meta-fill" style="width: <?= $porcentagem_meta ?>%;"></div>
                     </div>
                 </div>
             </div>
 
             <div class="kpi-card-pro theme-green">
-                <div class="kpi-icon"><i class="fas fa-chart-pie"></i></div>
-                <div class="kpi-label">Lucro Líquido (Est.)</div>
+                <div class="kpi-header">
+                    <span class="kpi-label">Lucro Líquido (Est.)</span>
+                    <div class="kpi-icon"><i class="fas fa-chart-line"></i></div>
+                </div>
                 <div class="kpi-value">R$ <?= number_format($lucro_mes, 2, ',', '.') ?></div>
-                <div class="kpi-sub" style="color: #059669;">
-                    <i class="fas fa-check-circle"></i> Margem real sobre custos
+                <div class="kpi-sub">
+                    <i class="fas fa-check-circle" style="color: var(--success);"></i> 
+                    Margem real sobre custos
                 </div>
             </div>
 
             <div class="kpi-card-pro theme-blue">
-                <div class="kpi-icon"><i class="fas fa-receipt"></i></div>
-                <div class="kpi-label">Ticket Médio</div>
-                <div class="kpi-value" style="color: #2563EB;">R$ <?= number_format($ticket_medio, 2, ',', '.') ?></div>
-                <div class="kpi-sub" style="color: #6B7280;">
-                    Baseado em <?= $qtd_vendas_mes ?> vendas
+                <div class="kpi-header">
+                    <span class="kpi-label">Ticket Médio</span>
+                    <div class="kpi-icon"><i class="fas fa-receipt"></i></div>
+                </div>
+                <div class="kpi-value">R$ <?= number_format($ticket_medio, 2, ',', '.') ?></div>
+                <div class="kpi-sub">
+                    Baseado em <strong><?= $qtd_vendas_mes ?></strong> vendas
                 </div>
             </div>
 
-            <div class="kpi-card-pro" style="border-left: 5px solid <?= $total_baixo > 0 ? '#DC2626' : '#10B981' ?>;">
-                <div class="kpi-icon" style="color: <?= $total_baixo > 0 ? '#DC2626' : '#10B981' ?>; opacity: 0.15; background: currentColor;">
-                    <i class="fas fa-box"></i>
+            <div class="kpi-card-pro theme-red" style="border-left: 4px solid <?= $total_baixo > 0 ? '#EF4444' : '#10B981' ?>;">
+                <div class="kpi-header">
+                    <span class="kpi-label">Saúde do Estoque</span>
+                    <div class="kpi-icon" style="<?= $total_baixo == 0 ? 'background:#ECFDF5; color:#059669;' : '' ?>">
+                        <i class="fas fa-box-open"></i>
+                    </div>
                 </div>
-                <div class="kpi-label">Saúde do Estoque</div>
-                <div class="kpi-value" style="color: <?= $total_baixo > 0 ? '#DC2626' : '#10B981' ?>;">
-                    <?= $total_baixo > 0 ? $total_baixo : 'OK' ?>
+                <div class="kpi-value" style="color: <?= $total_baixo > 0 ? '#DC2626' : '#059669' ?>;">
+                    <?= $total_baixo > 0 ? $total_baixo : '100%' ?>
                 </div>
-                <div class="kpi-sub" style="color: <?= $total_baixo > 0 ? '#DC2626' : '#10B981' ?>;">
-                    <?= $total_baixo > 0 ? 'Produtos precisam de reposição' : 'Estoque saudável' ?>
+                <div class="kpi-sub" style="color: <?= $total_baixo > 0 ? '#DC2626' : '#059669' ?>;">
+                    <?= $total_baixo > 0 ? 'Produtos em nível crítico' : 'Estoque saudável' ?>
                 </div>
             </div>
         </div>
 
         <div class="dashboard-grid-main">
             
-            <div class="chart-box">
-                <div class="chart-header">
-                    <h3 style="color: #374151; font-size: 1.1rem;"><?= $chart_title ?></h3>
+            <div class="card-box">
+                <div class="card-header">
+                    <h3 class="card-title"><?= $chart_title ?></h3>
                     
                     <div style="display: flex; gap: 15px;">
-                        <div class="chart-controls-group">
-                            <button class="type-btn active" onclick="mudarTipoGrafico('line')" id="btn-line" title="Linha"><i class="fas fa-chart-line"></i></button>
-                            <button class="type-btn" onclick="mudarTipoGrafico('bar')" id="btn-bar" title="Barras"><i class="fas fa-chart-bar"></i></button>
+                        <div class="chart-controls">
+                            <button class="control-btn icon-btn active" onclick="mudarTipo('line')" id="btn-line"><i class="fas fa-chart-area"></i></button>
+                            <button class="control-btn icon-btn" onclick="mudarTipo('bar')" id="btn-bar"><i class="fas fa-chart-bar"></i></button>
                         </div>
 
-                        <div class="chart-controls-group">
-                            <a href="?periodo=diario" class="periodo-btn <?= $periodo == 'diario' ? 'active' : '' ?>">Dia</a>
-                            <a href="?periodo=semanal" class="periodo-btn <?= $periodo == 'semanal' ? 'active' : '' ?>">Sem</a>
-                            <a href="?periodo=mensal" class="periodo-btn <?= $periodo == 'mensal' ? 'active' : '' ?>">Mês</a>
-                            <a href="?periodo=anual" class="periodo-btn <?= $periodo == 'anual' ? 'active' : '' ?>">Ano</a>
+                        <div class="chart-controls">
+                            <a href="?periodo=diario" class="control-btn <?= $periodo == 'diario' ? 'active' : '' ?>">Dia</a>
+                            <a href="?periodo=semanal" class="control-btn <?= $periodo == 'semanal' ? 'active' : '' ?>">Sem</a>
+                            <a href="?periodo=mensal" class="control-btn <?= $periodo == 'mensal' ? 'active' : '' ?>">Mês</a>
+                            <a href="?periodo=anual" class="control-btn <?= $periodo == 'anual' ? 'active' : '' ?>">Ano</a>
                         </div>
                     </div>
                 </div>
-                <div style="height: 350px; width: 100%;">
+                
+                <div style="height: 380px; width: 100%;">
                     <canvas id="mainChart"></canvas>
                 </div>
             </div>
 
             <div style="display: flex; flex-direction: column; gap: 1.5rem;">
                 
-                <div class="chart-box" style="height: auto;">
-                    <h3 style="color: #374151; font-size: 1rem; margin-bottom: 15px;">Vendas por Categoria</h3>
-                    <div style="height: 200px;">
+                <div class="card-box" style="height: auto;">
+                    <h3 class="card-title" style="margin-bottom: 20px;">Vendas por Categoria</h3>
+                    <div style="height: 220px; position: relative;">
                         <canvas id="catChart"></canvas>
                     </div>
                 </div>
 
                 <?php if ($total_baixo > 0): ?>
-                <div class="chart-box" style="height: auto; border: 1px solid #FECACA;">
-                    <h3 style="color: #DC2626; font-size: 1rem; margin-bottom: 10px;">
-                        <i class="fas fa-exclamation-triangle"></i> Reposição Urgente
+                <div class="card-box" style="height: auto; border: 1px solid #FECACA;">
+                    <h3 class="card-title" style="color: #DC2626; font-size: 1rem;">
+                        <i class="fas fa-exclamation-triangle"></i> Reposição Necessária
                     </h3>
                     <table class="stock-table">
                         <?php foreach ($estoque_baixo_lista as $prod): ?>
@@ -285,78 +406,64 @@ $total_baixo = count($estoque_baixo_lista);
                         </tr>
                         <?php endforeach; ?>
                     </table>
-                    <a href="estoque.php?filtro=estoque_baixo" style="display: block; text-align: center; margin-top: 10px; color: #DC2626; font-size: 0.8rem; font-weight: 600;">Ver todos &rarr;</a>
+                    <a href="estoque.php?filtro=estoque_baixo" style="display: block; text-align: center; margin-top: 15px; color: #DC2626; font-size: 0.85rem; font-weight: 600; text-decoration: none;">
+                        Gerenciar Estoque &rarr;
+                    </a>
                 </div>
                 <?php endif; ?>
-            </div>
-        </div>
-
-        <div id="chat-launcher" onclick="document.getElementById('chat-container').classList.remove('hidden')">
-            <i class="fas fa-robot"></i>
-        </div>
-        <div id="chat-container" class="hidden">
-            <div class="chat-header">
-                <h3>Relp! IA</h3>
-                <button id="close-chat" onclick="document.getElementById('chat-container').classList.add('hidden')"><i class="fas fa-times"></i></button>
-            </div>
-            <div class="chat-messages" id="chat-messages">
-                <div class="message ai">
-                    Olá! Seu ticket médio está em R$ <?= number_format($ticket_medio, 2) ?>. Quer dicas para aumentá-lo?
-                </div>
-            </div>
-            <div class="chat-input-form">
-                <form id="ai-chat-form">
-                    <input type="text" id="chat-input" placeholder="Pergunte..." autocomplete="off">
-                    <button type="submit"><i class="fas fa-paper-plane"></i></button>
-                </form>
             </div>
         </div>
 
     </main>
 
     <script>
+        // --- FUNÇÃO: EDITAR META ---
         function editarMeta() {
             Swal.fire({
-                title: 'Definir Meta Mensal',
+                title: 'Nova Meta Mensal',
                 input: 'number',
                 inputValue: <?= $meta_vendas ?>,
-                text: 'Qual seu objetivo de faturamento para este mês?',
+                text: 'Defina seu objetivo de vendas:',
                 showCancelButton: true,
-                confirmButtonText: 'Salvar',
-                confirmButtonColor: '#7C3AED',
+                confirmButtonText: 'Salvar Meta',
+                confirmButtonColor: '#6D28D9',
+                cancelButtonText: 'Cancelar',
                 preConfirm: (valor) => {
-                    if (!valor || valor <= 0) { Swal.showValidationMessage('Digite um valor válido'); }
+                    if (!valor || valor <= 0) return Swal.showValidationMessage('Valor inválido');
                     return valor;
                 }
             }).then((result) => {
                 if (result.isConfirmed) {
-                    const formData = new FormData();
-                    formData.append('meta', result.value);
-                    fetch('salvar_meta.php', { method: 'POST', body: formData })
+                    const fd = new FormData();
+                    fd.append('meta', result.value);
+                    fetch('salvar_meta.php', { method: 'POST', body: fd })
                     .then(r => r.text())
                     .then(resp => {
-                        if(resp.trim() === 'sucesso') { Swal.fire('Atualizado!', 'Sua meta foi definida.', 'success').then(() => location.reload()); } 
-                        else { Swal.fire('Erro', 'Não foi possível salvar.', 'error'); }
+                        if(resp.trim() === 'sucesso') location.reload();
+                        else Swal.fire('Erro', 'Não foi possível salvar.', 'error');
                     });
                 }
             });
         }
 
+        // --- CONFIGURAÇÃO DOS GRÁFICOS ---
         const ctx = document.getElementById('mainChart').getContext('2d');
-        let mainChart; 
+        let mainChart;
         const labels = <?= json_encode($labels_grafico) ?>;
         const dataValues = <?= json_encode($data_grafico) ?>;
 
+        // Gradiente Suave (Roxo)
         function getGradient() {
             const g = ctx.createLinearGradient(0, 0, 0, 400);
-            g.addColorStop(0, 'rgba(124, 58, 237, 0.2)'); 
-            g.addColorStop(1, 'rgba(124, 58, 237, 0.0)');
+            g.addColorStop(0, 'rgba(109, 40, 217, 0.25)'); // Mais visível no topo
+            g.addColorStop(1, 'rgba(109, 40, 217, 0.0)');  // Transparente na base
             return g;
         }
 
-        function renderMainChart(type) {
+        function renderChart(type) {
             if (mainChart) mainChart.destroy();
-            const config = {
+
+            mainChart = new Chart(ctx, {
                 type: type,
                 data: {
                     labels: labels,
@@ -366,56 +473,89 @@ $total_baixo = count($estoque_baixo_lista);
                         borderColor: '#7C3AED',
                         backgroundColor: type === 'line' ? getGradient() : '#7C3AED',
                         borderWidth: 2,
+                        borderRadius: type === 'bar' ? 6 : 0, // Arredondado se for barra
+                        barPercentage: 0.6, // Barras não muito grossas
+                        pointRadius: 0, // Remove bolinhas (limpo)
+                        pointHoverRadius: 6, // Bolinha aparece só no hover
                         pointBackgroundColor: '#fff',
                         pointBorderColor: '#7C3AED',
                         fill: true,
-                        tension: 0.4,
-                        borderRadius: type === 'bar' ? 5 : 0
+                        tension: 0.4 // Curva suave (spline)
                     }]
                 },
                 options: {
                     responsive: true,
                     maintainAspectRatio: false,
-                    plugins: { legend: { display: false } },
+                    plugins: { 
+                        legend: { display: false },
+                        tooltip: {
+                            backgroundColor: '#1F2937',
+                            padding: 12,
+                            titleFont: { size: 13 },
+                            bodyFont: { size: 14, weight: 'bold' },
+                            displayColors: false,
+                            callbacks: {
+                                label: function(context) {
+                                    return 'R$ ' + new Intl.NumberFormat('pt-BR', { minimumFractionDigits: 2 }).format(context.parsed.y);
+                                }
+                            }
+                        }
+                    },
                     scales: { 
-                        y: { beginAtZero: true, grid: { borderDash: [4, 4] }, ticks: { callback: function(val) { return 'R$ ' + val; } } },
-                        x: { grid: { display: false } }
+                        y: { 
+                            beginAtZero: true, 
+                            border: { display: false }, // Remove linha do eixo Y
+                            grid: { color: '#F3F4F6', drawBorder: false }, // Grade bem suave
+                            ticks: { 
+                                callback: function(val) { return 'R$ ' + val/1000 + 'k'; },
+                                color: '#9CA3AF',
+                                font: { size: 11 }
+                            } 
+                        },
+                        x: { 
+                            grid: { display: false }, // Sem grade vertical
+                            ticks: { color: '#6B7280', font: { size: 11 } }
+                        }
                     }
                 }
-            };
-            mainChart = new Chart(ctx, config);
+            });
         }
 
-        renderMainChart('line');
+        // Inicia com gráfico de linha (Área)
+        renderChart('line');
 
-        function mudarTipoGrafico(type) {
-            document.querySelectorAll('.type-btn').forEach(btn => btn.classList.remove('active'));
+        // Botões de Troca
+        function mudarTipo(type) {
+            document.querySelectorAll('.icon-btn').forEach(b => b.classList.remove('active'));
             document.getElementById('btn-' + type).classList.add('active');
-            renderMainChart(type);
+            renderChart(type);
         }
 
+        // Gráfico de Rosca (Categorias)
         <?php if (!empty($labels_cat)): ?>
-        const ctxCat = document.getElementById('catChart').getContext('2d');
-        new Chart(ctxCat, {
+        new Chart(document.getElementById('catChart').getContext('2d'), {
             type: 'doughnut',
             data: {
                 labels: <?= json_encode($labels_cat) ?>,
                 datasets: [{
                     data: <?= json_encode($data_cat) ?>,
-                    backgroundColor: ['#7C3AED', '#3B82F6', '#10B981', '#F59E0B', '#EF4444'],
-                    borderWidth: 0
+                    backgroundColor: ['#8B5CF6', '#3B82F6', '#10B981', '#F59E0B', '#EF4444'],
+                    borderWidth: 0,
+                    hoverOffset: 10
                 }]
             },
             options: {
                 responsive: true,
                 maintainAspectRatio: false,
-                plugins: { legend: { position: 'right', labels: { boxWidth: 12, font: { size: 10 } } } }
+                cutout: '75%', // Rosca mais fina (moderno)
+                plugins: { 
+                    legend: { position: 'right', labels: { boxWidth: 10, usePointStyle: true, font: { size: 11 } } } 
+                }
             }
         });
         <?php endif; ?>
     </script>
     
-    <script src="dashboard_chat.js"></script>
     <script src="main.js"></script>
     <script src="notificacoes.js"></script>
     <script src="notificacoes_fornecedor.js"></script>
